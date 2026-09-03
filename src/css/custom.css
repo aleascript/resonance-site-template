@@ -74,7 +74,7 @@ body {
 }
 
 /* `:::design` is a custom editorial admonition; standard `:::note` remains untouched. */
-.theme-admonition-design .theme-admonition-note {
+.theme-admonition-design {
   border: var(--site-border-width) solid var(--site-border);
   border-left: 4px solid var(--site-primary);
   border-radius: var(--site-radius);
