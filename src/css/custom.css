@@ -73,6 +73,15 @@ body {
   color: var(--site-muted);
 }
 
+/* `:::design` is a custom editorial admonition; standard `:::note` remains untouched. */
+.theme-admonition-design {
+  border: var(--site-border-width) solid var(--site-border);
+  border-left: 4px solid var(--site-primary);
+  border-radius: var(--site-radius);
+  background: color-mix(in srgb, var(--site-primary) 7%, var(--site-surface));
+  color: var(--site-text);
+}
+
 .table-of-contents {
   border-left-color: var(--site-border);
 }
