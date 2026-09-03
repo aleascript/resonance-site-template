@@ -18,6 +18,16 @@ export type SiteLineage = {
   poweredBy: ProjectLink | null;
 };
 
+export type ContentLicense = {
+  label: string;
+  href: string;
+  attribution: {
+    title: string;
+    author: string;
+    href: string | null;
+  };
+};
+
 export type ThemePalette = {
   primary: string;
   background: string;
@@ -71,6 +81,15 @@ export const site = {
     logo: 'img/site/resonance_simple_200x200.png',
     favicon: 'img/site/resonance_simple_200x200.png',
   } satisfies SiteIdentity,
+  license: {
+    label: 'CC BY 4.0',
+    href: 'https://creativecommons.org/licenses/by/4.0/',
+    attribution: {
+      title: 'Resonance Site',
+      author: 'AleaScript',
+      href: null,
+    },
+  } satisfies ContentLicense,
   lineage: {
     designedWith: null,
     poweredBy: null,
