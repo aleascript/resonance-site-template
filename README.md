@@ -64,24 +64,34 @@ the browser languages. A choice made with the language menu is saved in
 `localStorage`. The storage key includes the GitHub Pages base path, so several
 sites hosted under the same `github.io` domain keep independent preferences.
 
-## Local development
+## Local development whith hot reload
+
+Docusaurus sees locales as distinct sites. So for hot reload, you can work only with a single locale. 
 
 Start the English edition:
 
 ```bash
-npm run start
+npm run start:en
 ```
 
-Start another locale:
+Start with fr locale:
 
 ```bash
-npm run start -- --locale fr
+npm run start:fr
 ```
 
 Validate types and every configured locale:
 
 ```bash
 npm run check
+```
+
+## Local preview
+
+Build and serve locally (without hot-reload): 
+
+```bash
+npm run preview
 ```
 
 ## Theme and navigation

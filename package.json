@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
-    "start": "docusaurus start",
+    "start:fr": "docusaurus start --locale fr",
+    "start:en": "docusaurus start --locale en",
+    "preview": "docusaurus serve --build",
     "build": "docusaurus build",
     "build:en": "docusaurus build --locale en",
     "build:fr": "docusaurus build --locale fr",
@@ -17,6 +19,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "24": "^0.0.0",
     "@docusaurus/core": "3.10.2",
     "@docusaurus/faster": "3.10.2",
     "@docusaurus/preset-classic": "3.10.2",
