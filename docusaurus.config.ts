@@ -40,7 +40,7 @@ if (!locales.includes(contentLocale)) {
 const config: Config = {
   title: site.title,
   tagline: site.tagline,
-  favicon: site.identity.favicon,
+  favicon: site.identity.favicon ?? undefined,
   url,
   baseUrl,
   organizationName,
@@ -92,10 +92,14 @@ const config: Config = {
     },
     navbar: {
       title: site.title,
-      logo: {
-        alt: `${site.title} logo`,
-        src: site.identity.logo,
-      },
+      ...(site.identity.logo
+        ? {
+            logo: {
+              alt: `${site.title} logo`,
+              src: site.identity.logo,
+            },
+          }
+        : {}),
       items: [
         {
           type: 'docSidebar',
