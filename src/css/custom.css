@@ -73,6 +73,19 @@ body {
   color: var(--site-muted);
 }
 
+/*
+ * Editorial convention: Docusaurus `note` admonitions are reserved for
+ * design notes. Games can override this selector to express their own visual
+ * language while keeping the authoring syntax identical.
+ */
+.theme-admonition-note {
+  border: var(--site-border-width) solid var(--site-border);
+  border-left: 4px solid var(--site-primary);
+  border-radius: var(--site-radius);
+  background: color-mix(in srgb, var(--site-primary) 7%, var(--site-surface));
+  color: var(--site-text);
+}
+
 .table-of-contents {
   border-left-color: var(--site-border);
 }
