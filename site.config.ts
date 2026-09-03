@@ -8,6 +8,16 @@ export type SiteIdentity = {
   favicon: string | null;
 };
 
+export type ProjectLink = {
+  label: string;
+  href: string;
+};
+
+export type SiteLineage = {
+  designedWith: ProjectLink | null;
+  poweredBy: ProjectLink | null;
+};
+
 export type ThemePalette = {
   primary: string;
   background: string;
@@ -61,6 +71,10 @@ export const site = {
     logo: 'img/site/resonance_simple_200x200.png',
     favicon: 'img/site/resonance_simple_200x200.png',
   } satisfies SiteIdentity,
+  lineage: {
+    designedWith: null,
+    poweredBy: null,
+  } as SiteLineage,
   theme: {
     colors: {
       light: {
