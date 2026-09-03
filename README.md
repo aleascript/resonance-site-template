@@ -15,7 +15,7 @@ authoring, and deployment instructions belong in this README.
 - a neutral, accessible light and dark theme;
 - project-level visual tokens for identity, colors, typography, geometry, and editorial width;
 - optional project-lineage credits in the footer;
-- a shared editorial convention for visually distinct design notes;
+- a dedicated `design` admonition for visually distinct design notes;
 - automatic validation and deployment to GitHub Pages.
 
 ## Create a site from the template
@@ -80,19 +80,29 @@ This creates three practical levels of customization:
 
 ## Editorial conventions
 
-Docusaurus `note` admonitions are reserved for **design notes**. Authors use the
-same simple source syntax in every game:
+Design notes have their own custom admonition type. This deliberately leaves
+Docusaurus' standard `note` type available for ordinary reader-facing notes.
 
 ```md
-:::note[Design note]
+:::design[Design note]
 This explains why the rule is shaped this way rather than what the rule does.
 :::
 ```
 
-French content uses `:::note[Note de design]`. The template supplies a restrained
-base treatment through `.theme-admonition-note`; each game may override that
+French content uses `:::design[Note de design]`. The template registers
+`design` as an additional admonition keyword and supplies a restrained base
+treatment through `.theme-admonition-design`. Each game may override that
 selector in `src/css/custom.css` so a Scooby-Doo design note, an Unmind clinical
-note and a Regard optical note remain visually native to their own sites.
+design note and a Regard optical design note remain visually native to their
+own sites.
+
+Regular admonitions keep their normal meaning, for example:
+
+```md
+:::note[Remember]
+This is an ordinary note for the reader.
+:::
+```
 
 ## Content structure
 
@@ -184,7 +194,8 @@ work.
 ## Theme and navigation
 
 - Project metadata, lineage and visual tokens: `site.config.ts`
-- Docusaurus, locale, navbar, and footer configuration: `docusaurus.config.ts`
+- Docusaurus, locale, navbar, footer, and admonition parsing: `docusaurus.config.ts`
+- Custom admonition renderers: `src/theme/Admonition/Types.js`
 - Sidebar structure: `sidebars.ts`
 - Theme tokens and editorial styles: `src/css/custom.css`
 - Runtime theme variables, language detection and preference persistence: `src/theme/Root.tsx`
@@ -229,9 +240,11 @@ sont propres — texture, ornements ou grammaire éditoriale — sans modifier l
 composants Docusaurus. Les composants spécifiques restent réservés aux besoins
 qui ne peuvent pas être exprimés proprement par configuration et CSS.
 
-Les admonitions `note` servent conventionnellement aux **Notes de design**. Le
-template fournit leur structure visuelle minimale, que chaque jeu peut ensuite
-réinterpréter dans son propre CSS.
+Les **Notes de design** utilisent le type d'admonition dédié
+`:::design[Note de design]`. Le type standard `:::note` reste disponible pour
+les vraies notes destinées au lecteur. Le template fournit une structure
+visuelle minimale pour `design`, que chaque jeu peut ensuite réinterpréter dans
+son propre CSS.
 
 ### Filiation du projet
 
