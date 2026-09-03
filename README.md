@@ -14,6 +14,8 @@ authoring, and deployment instructions belong in this README.
 - a manually selected language remembered per site;
 - a neutral, accessible light and dark theme;
 - project-level visual tokens for identity, colors, typography, geometry, and editorial width;
+- optional project-lineage credits in the footer;
+- a shared editorial convention for visually distinct design notes;
 - automatic validation and deployment to GitHub Pages.
 
 ## Create a site from the template
@@ -28,6 +30,31 @@ authoring, and deployment instructions belong in this README.
 The workflow infers the GitHub owner, repository name, public URL, and Pages
 base path. Set `SITE_URL` and `SITE_BASE_URL` only for a custom domain or an
 unusual deployment.
+
+## Project lineage
+
+`site.config.ts` can describe the conceptual lineage of the published game:
+
+```ts
+lineage: {
+  designedWith: {
+    label: 'Resonance',
+    href: 'https://aleascript.github.io/resonance/',
+  },
+  poweredBy: {
+    label: 'Regard',
+    href: 'https://aleascript.github.io/regard/',
+  },
+}
+```
+
+The footer then renders a compact credit such as:
+
+`© 2026 AleaScript · designed with Resonance · powered by Regard`
+
+Both project names are links. A game created directly from Resonance, such as a
+standalone experiment that does not use Regard, simply leaves `poweredBy` null.
+Resonance itself can leave both values null.
 
 ## Visual customization
 
@@ -50,6 +77,22 @@ This creates three practical levels of customization:
 1. **Identity** — logo, colors, type and geometry in `site.config.ts`;
 2. **Mood** — project-specific textures, ornaments and editorial treatments in `custom.css`;
 3. **Expression** — custom React/MDX components only when a game genuinely needs a unique interaction or visual form.
+
+## Editorial conventions
+
+Docusaurus `note` admonitions are reserved for **design notes**. Authors use the
+same simple source syntax in every game:
+
+```md
+:::note[Design note]
+This explains why the rule is shaped this way rather than what the rule does.
+:::
+```
+
+French content uses `:::note[Note de design]`. The template supplies a restrained
+base treatment through `.theme-admonition-note`; each game may override that
+selector in `src/css/custom.css` so a Scooby-Doo design note, an Unmind clinical
+note and a Regard optical note remain visually native to their own sites.
 
 ## Content structure
 
@@ -110,9 +153,37 @@ Validate types and every configured locale:
 npm run check
 ```
 
+## Updating a derived site
+
+A GitHub template is a **snapshot**, not a live parent repository. Creating a
+site with **Use this template** does not create a relationship that can later be
+updated with `git pull`.
+
+During the current design-lab phase, generic improvements should therefore be
+promoted to this template and then deliberately ported to each affected game in
+a small pull request. This is preferable to blind synchronization because the
+files most likely to diverge — `site.config.ts`, `src/css/custom.css`, documents
+and assets — are intentionally game-specific.
+
+A template remote can still be useful for inspecting or applying individual
+commits:
+
+```bash
+git remote add site-template https://github.com/aleascript/resonance-site-template.git
+git fetch site-template
+```
+
+From there, a genuinely generic commit can be cherry-picked when its patch is
+compatible. When the boundary between shared infrastructure and game-specific
+expression is stable, the next logical step is to extract the shared files into
+a controlled updater or package and expose a command such as
+`npm run template:update`. That command does **not** exist yet; adding it before
+those boundaries stabilize would risk overwriting intentional game-specific
+work.
+
 ## Theme and navigation
 
-- Project metadata and visual tokens: `site.config.ts`
+- Project metadata, lineage and visual tokens: `site.config.ts`
 - Docusaurus, locale, navbar, and footer configuration: `docusaurus.config.ts`
 - Sidebar structure: `sidebars.ts`
 - Theme tokens and editorial styles: `src/css/custom.css`
@@ -157,6 +228,30 @@ Un jeu peut ensuite ajouter dans `src/css/custom.css` des traitements qui lui
 sont propres — texture, ornements ou grammaire éditoriale — sans modifier les
 composants Docusaurus. Les composants spécifiques restent réservés aux besoins
 qui ne peuvent pas être exprimés proprement par configuration et CSS.
+
+Les admonitions `note` servent conventionnellement aux **Notes de design**. Le
+template fournit leur structure visuelle minimale, que chaque jeu peut ensuite
+réinterpréter dans son propre CSS.
+
+### Filiation du projet
+
+Le bloc `lineage` de `site.config.ts` contrôle les crédits du pied de page. Un
+jeu utilisant Regard peut déclarer Resonance comme méthode de design et Regard
+comme architecture ; un jeu autonome comme Unmind ne déclare que Resonance.
+
+### Mettre à jour un site dérivé
+
+Un dépôt créé depuis un template GitHub est une copie instantanée : il ne reste
+pas synchronisé avec son template. Pour le moment, les améliorations génériques
+sont donc reportées volontairement dans chaque jeu via une petite PR. C'est un
+choix de sécurité tant que nous découvrons encore où passe la frontière entre
+le noyau commun et l'expression propre à chaque jeu.
+
+Lorsque cette frontière sera stable, nous pourrons ajouter un updater contrôlé
+— par exemple `npm run template:update` — limité aux fichiers réellement
+partagés. Un `git pull` automatique de tout le template serait au contraire
+dangereux car il écraserait précisément les personnalisations que le template
+est censé permettre.
 
 ### Créer un site
 
