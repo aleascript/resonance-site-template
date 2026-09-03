@@ -26,6 +26,13 @@ const baseUrl = normalizeBaseUrl(
   process.env.SITE_BASE_URL ?? (isUserPagesRepository ? '/' : projectName),
 );
 const repositoryUrl = `https://github.com/${repositoryFullName}`;
+const locales = Object.keys(site.locales);
+const contentLocale =
+  process.env.DOCUSAURUS_CURRENT_LOCALE ?? site.defaultLocale;
+
+if (!locales.includes(contentLocale)) {
+  throw new Error(`No content directory configured for locale "${contentLocale}".`);
+}
 
 const config: Config = {
   title: site.title,
@@ -47,18 +54,9 @@ const config: Config = {
   },
 
   i18n: {
-    defaultLocale: 'en',
-    locales: ['en', 'fr'],
-    localeConfigs: {
-      en: {
-        htmlLang: 'en',
-        label: 'English',
-      },
-      fr: {
-        htmlLang: 'fr',
-        label: 'Français',
-      },
-    },
+    defaultLocale: site.defaultLocale,
+    locales,
+    localeConfigs: site.locales,
   },
 
   presets: [
@@ -66,9 +64,9 @@ const config: Config = {
       'classic',
       {
         docs: {
+          path: `./docs/${contentLocale}`,
           routeBasePath: '/',
           sidebarPath: './sidebars.ts',
-          editUrl: `${repositoryUrl}/edit/${site.repository.branch}/`,
         },
         blog: false,
         pages: false,

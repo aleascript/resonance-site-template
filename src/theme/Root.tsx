@@ -3,23 +3,25 @@ import {useEffect} from 'react';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
 const PERSIST_QUERY_PARAMETER = 'persistLocale';
-const SUPPORTED_LOCALES = ['en', 'fr'] as const;
 
-type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
-
-function readPreference(storageKey: string): SupportedLocale | null {
+function readPreference(
+  storageKey: string,
+  supportedLocales: readonly string[],
+): string | null {
   try {
     const value = window.localStorage.getItem(storageKey);
-    return SUPPORTED_LOCALES.includes(value as SupportedLocale)
-      ? (value as SupportedLocale)
-      : null;
+    return value && supportedLocales.includes(value) ? value : null;
   } catch {
     return null;
   }
 }
 
-function savePreference(storageKey: string, locale: string): void {
-  if (!SUPPORTED_LOCALES.includes(locale as SupportedLocale)) {
+function savePreference(
+  storageKey: string,
+  locale: string,
+  supportedLocales: readonly string[],
+): void {
+  if (!supportedLocales.includes(locale)) {
     return;
   }
 
@@ -30,17 +32,31 @@ function savePreference(storageKey: string, locale: string): void {
   }
 }
 
-function detectBrowserLocale(): SupportedLocale {
+function detectBrowserLocale(
+  supportedLocales: readonly string[],
+  defaultLocale: string,
+): string {
   const browserLocales = navigator.languages ?? [navigator.language];
 
   for (const browserLocale of browserLocales) {
-    const language = browserLocale.toLowerCase().split('-')[0];
-    if (SUPPORTED_LOCALES.includes(language as SupportedLocale)) {
-      return language as SupportedLocale;
+    const normalizedLocale = browserLocale.toLowerCase();
+    const exactMatch = supportedLocales.find(
+      (locale) => locale.toLowerCase() === normalizedLocale,
+    );
+    if (exactMatch) {
+      return exactMatch;
+    }
+
+    const language = normalizedLocale.split('-')[0];
+    const languageMatch = supportedLocales.find(
+      (locale) => locale.toLowerCase().split('-')[0] === language,
+    );
+    if (languageMatch) {
+      return languageMatch;
     }
   }
 
-  return 'en';
+  return defaultLocale;
 }
 
 export default function Root({children}: {children: ReactNode}): ReactNode {
@@ -49,10 +65,11 @@ export default function Root({children}: {children: ReactNode}): ReactNode {
   useEffect(() => {
     const url = new URL(window.location.href);
     const siteBaseUrl = i18n.localeConfigs[i18n.defaultLocale].baseUrl;
+    const supportedLocales = i18n.locales;
     const storageKey = `resonance-site:${siteBaseUrl}:locale`;
 
     if (url.searchParams.get(PERSIST_QUERY_PARAMETER) === 'true') {
-      savePreference(storageKey, i18n.currentLocale);
+      savePreference(storageKey, i18n.currentLocale, supportedLocales);
       url.searchParams.delete(PERSIST_QUERY_PARAMETER);
       window.history.replaceState(
         window.history.state,
@@ -72,8 +89,9 @@ export default function Root({children}: {children: ReactNode}): ReactNode {
     }
 
     const preferredLocale =
-      readPreference(storageKey) ?? detectBrowserLocale();
-    savePreference(storageKey, preferredLocale);
+      readPreference(storageKey, supportedLocales) ??
+      detectBrowserLocale(supportedLocales, i18n.defaultLocale);
+    savePreference(storageKey, preferredLocale, supportedLocales);
 
     if (preferredLocale !== i18n.defaultLocale) {
       window.location.replace(`${siteBaseUrl}${preferredLocale}/`);
