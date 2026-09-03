@@ -37,6 +37,7 @@ if (!locales.includes(contentLocale)) {
 const config: Config = {
   title: site.title,
   tagline: site.tagline,
+  favicon: 'img/site/resonance_simple_200x200.png',
   url,
   baseUrl,
   organizationName,
@@ -84,6 +85,10 @@ const config: Config = {
     },
     navbar: {
       title: site.title,
+      logo: {
+        alt: `${site.title} logo`,
+        src: 'img/site/resonance_simple_200x200.png',
+      },
       items: [
         {
           type: 'docSidebar',
