@@ -1,0 +1,63 @@
+/*
+ * The template deliberately starts with a restrained editorial theme.
+ * Derived games can replace these tokens without touching component code.
+ */
+:root {
+  --ifm-color-primary: #315da8;
+  --ifm-color-primary-dark: #2c5497;
+  --ifm-color-primary-darker: #294f8f;
+  --ifm-color-primary-darkest: #224176;
+  --ifm-color-primary-light: #3968b8;
+  --ifm-color-primary-lighter: #416fbb;
+  --ifm-color-primary-lightest: #6188c8;
+  --ifm-background-color: #fcfcfd;
+  --ifm-font-family-base:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  --ifm-font-family-monospace:
+    "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --ifm-font-size-base: 100%;
+  --ifm-line-height-base: 1.7;
+  --ifm-heading-font-weight: 650;
+  --ifm-navbar-shadow: 0 1px 0 rgb(20 29 43 / 10%);
+  --ifm-code-font-size: 92%;
+  --docusaurus-highlighted-code-line-bg: rgb(49 93 168 / 10%);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #8eb6f4;
+  --ifm-color-primary-dark: #70a3ef;
+  --ifm-color-primary-darker: #6199ed;
+  --ifm-color-primary-darkest: #347ce6;
+  --ifm-color-primary-light: #acc9f7;
+  --ifm-color-primary-lighter: #bbd3f9;
+  --ifm-color-primary-lightest: #e7f0fd;
+  --ifm-background-color: #10141b;
+  --ifm-background-surface-color: #171d27;
+  --ifm-navbar-background-color: #10141b;
+  --ifm-footer-background-color: #0a0d12;
+  --ifm-navbar-shadow: 0 1px 0 rgb(255 255 255 / 9%);
+  --docusaurus-highlighted-code-line-bg: rgb(142 182 244 / 14%);
+}
+
+.navbar__title {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.theme-doc-markdown {
+  max-width: 52rem;
+}
+
+.theme-doc-markdown > h1:first-child {
+  letter-spacing: -0.035em;
+}
+
+.theme-doc-markdown p,
+.theme-doc-markdown li {
+  font-size: 1.04rem;
+}
+
+.footer--dark {
+  --ifm-footer-background-color: #111722;
+}
