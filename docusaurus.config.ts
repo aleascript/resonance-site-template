@@ -103,6 +103,10 @@ const config: Config = {
           path: `./docs/${contentLocale}`,
           routeBasePath: '/',
           sidebarPath: './sidebars.ts',
+          admonitions: {
+            keywords: ['design'],
+            extendDefaults: true,
+          },
         },
         blog: false,
         pages: false,
