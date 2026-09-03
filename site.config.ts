@@ -3,6 +3,11 @@
  * have one obvious place to start customizing.
  */
 
+export type SiteIdentity = {
+  logo: string | null;
+  favicon: string | null;
+};
+
 export type ThemePalette = {
   primary: string;
   background: string;
@@ -55,7 +60,7 @@ export const site = {
   identity: {
     logo: 'img/site/resonance_simple_200x200.png',
     favicon: 'img/site/resonance_simple_200x200.png',
-  },
+  } satisfies SiteIdentity,
   theme: {
     colors: {
       light: {
