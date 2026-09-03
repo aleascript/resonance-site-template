@@ -27,8 +27,11 @@ const baseUrl = normalizeBaseUrl(
 );
 const repositoryUrl = `https://github.com/${repositoryFullName}`;
 const locales = Object.keys(site.locales);
+const requestedLocale = process.env.DOCUSAURUS_CURRENT_LOCALE;
 const contentLocale =
-  process.env.DOCUSAURUS_CURRENT_LOCALE ?? site.defaultLocale;
+  requestedLocale && requestedLocale !== 'undefined'
+    ? requestedLocale
+    : site.defaultLocale;
 
 if (!locales.includes(contentLocale)) {
   throw new Error(`No content directory configured for locale "${contentLocale}".`);
@@ -37,7 +40,7 @@ if (!locales.includes(contentLocale)) {
 const config: Config = {
   title: site.title,
   tagline: site.tagline,
-  favicon: 'img/site/resonance_simple_200x200.png',
+  favicon: site.identity.favicon,
   url,
   baseUrl,
   organizationName,
@@ -52,6 +55,10 @@ const config: Config = {
 
   future: {
     v4: true,
+  },
+
+  customFields: {
+    visualTheme: site.theme,
   },
 
   i18n: {
@@ -87,7 +94,7 @@ const config: Config = {
       title: site.title,
       logo: {
         alt: `${site.title} logo`,
-        src: 'img/site/resonance_simple_200x200.png',
+        src: site.identity.logo,
       },
       items: [
         {

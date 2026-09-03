@@ -1,43 +1,53 @@
 /*
  * The template deliberately starts with a restrained editorial theme.
- * Derived games can replace these tokens without touching component code.
+ * Derived games can replace the tokens in site.config.ts and add a small
+ * amount of project-specific CSS without touching component code.
  */
 :root {
-  --ifm-color-primary: #315da8;
-  --ifm-color-primary-dark: #2c5497;
-  --ifm-color-primary-darker: #294f8f;
-  --ifm-color-primary-darkest: #224176;
-  --ifm-color-primary-light: #3968b8;
-  --ifm-color-primary-lighter: #416fbb;
-  --ifm-color-primary-lightest: #6188c8;
-  --ifm-background-color: #fcfcfd;
-  --ifm-font-family-base:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
-  --ifm-font-family-monospace:
-    "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --ifm-color-primary: var(--site-primary);
+  --ifm-color-primary-dark: color-mix(in srgb, var(--site-primary) 88%, black);
+  --ifm-color-primary-darker: color-mix(in srgb, var(--site-primary) 80%, black);
+  --ifm-color-primary-darkest: color-mix(in srgb, var(--site-primary) 66%, black);
+  --ifm-color-primary-light: color-mix(in srgb, var(--site-primary) 88%, white);
+  --ifm-color-primary-lighter: color-mix(in srgb, var(--site-primary) 80%, white);
+  --ifm-color-primary-lightest: color-mix(in srgb, var(--site-primary) 64%, white);
+  --ifm-background-color: var(--site-background);
+  --ifm-background-surface-color: var(--site-surface);
+  --ifm-font-color-base: var(--site-text);
+  --ifm-color-content-secondary: var(--site-muted);
+  --ifm-font-family-base: var(--site-font-body);
+  --ifm-heading-font-family: var(--site-font-heading);
+  --ifm-font-family-monospace: var(--site-font-mono);
   --ifm-font-size-base: 100%;
   --ifm-line-height-base: 1.7;
-  --ifm-heading-font-weight: 650;
-  --ifm-navbar-shadow: 0 1px 0 rgb(20 29 43 / 10%);
+  --ifm-heading-font-weight: var(--site-heading-weight);
+  --ifm-global-radius: var(--site-radius);
+  --ifm-global-border-width: var(--site-border-width);
+  --ifm-navbar-shadow: var(--site-navbar-shadow);
+  --ifm-navbar-background-color: var(--site-background);
+  --ifm-toc-border-color: var(--site-border);
+  --ifm-color-emphasis-200: var(--site-border);
+  --ifm-color-emphasis-300: var(--site-border);
   --ifm-code-font-size: 92%;
-  --docusaurus-highlighted-code-line-bg: rgb(49 93 168 / 10%);
+  --docusaurus-highlighted-code-line-bg: color-mix(
+    in srgb,
+    var(--site-primary) 12%,
+    transparent
+  );
+}
+
+html,
+body {
+  background: var(--site-background);
+  color: var(--site-text);
 }
 
 [data-theme='dark'] {
-  --ifm-color-primary: #8eb6f4;
-  --ifm-color-primary-dark: #70a3ef;
-  --ifm-color-primary-darker: #6199ed;
-  --ifm-color-primary-darkest: #347ce6;
-  --ifm-color-primary-light: #acc9f7;
-  --ifm-color-primary-lighter: #bbd3f9;
-  --ifm-color-primary-lightest: #e7f0fd;
-  --ifm-background-color: #10141b;
-  --ifm-background-surface-color: #171d27;
-  --ifm-navbar-background-color: #10141b;
-  --ifm-footer-background-color: #0a0d12;
-  --ifm-navbar-shadow: 0 1px 0 rgb(255 255 255 / 9%);
-  --docusaurus-highlighted-code-line-bg: rgb(142 182 244 / 14%);
+  --docusaurus-highlighted-code-line-bg: color-mix(
+    in srgb,
+    var(--site-primary) 16%,
+    transparent
+  );
 }
 
 .navbar__title {
@@ -46,7 +56,7 @@
 }
 
 .theme-doc-markdown {
-  max-width: 52rem;
+  max-width: var(--site-content-width);
 }
 
 .theme-doc-markdown > h1:first-child {
@@ -58,6 +68,19 @@
   font-size: 1.04rem;
 }
 
+.theme-doc-markdown blockquote {
+  border-left-color: var(--site-primary);
+  color: var(--site-muted);
+}
+
+.table-of-contents {
+  border-left-color: var(--site-border);
+}
+
 .footer--dark {
-  --ifm-footer-background-color: #111722;
+  --ifm-footer-background-color: color-mix(
+    in srgb,
+    var(--site-background) 76%,
+    black
+  );
 }
