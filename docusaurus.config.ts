@@ -96,6 +96,9 @@ const config: Config = {
 
   customFields: {
     visualTheme: site.theme,
+    // Docusaurus localizes siteConfig.baseUrl for non-default locales. Keep the
+    // actual deployment root available for shared, non-localized assets.
+    deploymentBaseUrl: baseUrl,
   },
 
   i18n: {
