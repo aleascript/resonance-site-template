@@ -60,7 +60,7 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
-      - name: Simulate pre-1.0 release baseline
+      - name: Simulate semantic baseline for dry run
         run: |
           if ! git tag --list 'v[0-9]*' | grep -q .; then
             git tag v0.0.0 origin/main
@@ -100,10 +100,45 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Ensure pre-1.0 release baseline
-        run: npm run release:baseline
+      - name: Detect initial release
+        id: release-state
+        shell: bash
+        run: |
+          if git tag --list 'v[0-9]*' | grep -q .; then
+            echo "bootstrap=false" >> "$GITHUB_OUTPUT"
+          else
+            version=$(node --input-type=module -e "import config from './publications.config.mjs'; process.stdout.write(config.release?.initialVersion ?? '0.1.0')")
+            echo "bootstrap=true" >> "$GITHUB_OUTPUT"
+            echo "version=$version" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Prepare initial release
+        if: steps.release-state.outputs.bootstrap == 'true'
+        run: npm run release:prepare -- "${{ steps.release-state.outputs.version }}"
+
+      - name: Create initial GitHub Release
+        if: steps.release-state.outputs.bootstrap == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.release-state.outputs.version }}
+        shell: bash
+        run: |
+          assets=(dist/publications/*.pdf dist/publications/*.epub dist/publications/publications.json)
+          existing_assets=()
+          for asset in "${assets[@]}"; do
+            if [[ -f "$asset" ]]; then
+              existing_assets+=("$asset")
+            fi
+          done
+
+          gh release create "v${VERSION}" \
+            "${existing_assets[@]}" \
+            --target "$GITHUB_SHA" \
+            --title "v${VERSION}" \
+            --generate-notes
 
       - name: Semantic Release
+        if: steps.release-state.outputs.bootstrap != 'true'
         id: semantic
         uses: cycjimmy/semantic-release-action@v6
         with:
@@ -114,7 +149,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build current corpus when no release is required
-        if: steps.semantic.outputs.new_release_published != 'true'
+        if: >-
+          steps.release-state.outputs.bootstrap != 'true' &&
+          steps.semantic.outputs.new_release_published != 'true'
         run: |
           npm run publication:build
           npm run build
