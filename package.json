@@ -10,6 +10,7 @@
     "build": "docusaurus build",
     "build:en": "docusaurus build --locale en",
     "build:fr": "docusaurus build --locale fr",
+    "publication:build": "node tools/build-publications.mjs",
     "check": "npm run typecheck && npm run build",
     "swizzle": "docusaurus swizzle",
     "clear": "docusaurus clear",
@@ -34,6 +35,7 @@
     "@docusaurus/tsconfig": "3.10.2",
     "@docusaurus/types": "3.10.2",
     "@types/react": "19.2.18",
+    "@vivliostyle/cli": "^11.2.0",
     "typescript": "6.0.3"
   },
   "browserslist": {
