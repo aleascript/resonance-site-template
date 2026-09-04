@@ -90,21 +90,74 @@ blockquote > :last-child {
   font-weight: 700;
 }
 
+/*
+ * Admonition icons are deliberately drawn with CSS instead of Unicode emoji or
+ * symbol glyphs. PDF generation must not depend on whatever fallback fonts are
+ * installed on the machine or CI runner.
+ */
+.publication-admonition-title::before {
+  display: inline-grid;
+  box-sizing: border-box;
+  width: 1em;
+  height: 1em;
+  margin-right: 0.4em;
+  place-items: center;
+  vertical-align: -0.08em;
+  font-family: Arial, sans-serif;
+  font-size: 0.85em;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Note: a small document with two text lines. */
 .publication-admonition-note::before {
-  content: 'ℹ ';
+  border: 0.11em solid currentColor;
+  border-radius: 0.08em;
+  background:
+    linear-gradient(currentColor, currentColor) center 36% / 55% 0.1em no-repeat,
+    linear-gradient(currentColor, currentColor) center 64% / 55% 0.1em no-repeat;
+  content: '';
 }
 
+/* Info: circled ASCII i. */
+.publication-admonition-info::before {
+  border: 0.11em solid currentColor;
+  border-radius: 50%;
+  content: 'i';
+}
+
+/* Tip: check mark drawn from borders. */
 .publication-admonition-tip::before {
-  content: '✓ ';
+  width: 0.7em;
+  height: 0.42em;
+  margin-right: 0.55em;
+  border-right: 0.14em solid currentColor;
+  border-bottom: 0.14em solid currentColor;
+  content: '';
+  transform: translateY(-0.08em) rotate(45deg);
 }
 
-.publication-admonition-warning::before,
+/* Warning and danger use only an ASCII exclamation mark inside CSS geometry. */
+.publication-admonition-warning::before {
+  border: 0.11em solid currentColor;
+  border-radius: 0.15em;
+  content: '!';
+}
+
 .publication-admonition-danger::before {
-  content: '⚠ ';
+  border: 0.11em solid currentColor;
+  border-radius: 50%;
+  content: '!';
 }
 
+/* Design: a diamond drawn from a rotated border. */
 .publication-admonition-design::before {
-  content: '◇ ';
+  width: 0.68em;
+  height: 0.68em;
+  margin-right: 0.55em;
+  border: 0.11em solid currentColor;
+  content: '';
+  transform: rotate(45deg);
 }
 
 .publication-cover-page {
