@@ -86,6 +86,47 @@ body {
   border-left-color: var(--site-border);
 }
 
+.publications-page {
+  max-width: var(--site-content-width);
+}
+
+.publications-header {
+  margin-bottom: 2rem;
+}
+
+.publications-header > h1 {
+  margin-bottom: 0.5rem;
+}
+
+.publications-version,
+.publication-revision {
+  color: var(--site-muted);
+}
+
+.publications-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+}
+
+.publication-card {
+  padding: 1.25rem;
+  border: var(--site-border-width) solid var(--site-border);
+  border-radius: var(--site-radius);
+  background: var(--site-surface);
+}
+
+.publication-card > h2 {
+  margin-bottom: 0.35rem;
+}
+
+.publication-formats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
 .footer--dark {
   --ifm-footer-background-color: color-mix(
     in srgb,
