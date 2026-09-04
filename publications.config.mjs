@@ -9,9 +9,28 @@ export default definePublications({
   publications: {
     core: {
       author: 'AleaScript',
+      version: '0.1.0',
+      revision: 'POC',
+      license: {
+        label: 'CC BY 4.0',
+        href: 'https://creativecommons.org/licenses/by/4.0/',
+        attribution: {
+          title: 'Resonance Site',
+          author: 'AleaScript',
+          href: null,
+        },
+      },
+      lineage: {
+        designedWith: null,
+        poweredBy: null,
+      },
       size: 'A5',
       theme: 'publication/theme.css',
-      cover: 'static/img/site/resonance_complex_big.png',
+      cover: {
+        image: 'static/img/site/resonance_complex_big.png',
+        showTitle: true,
+        showMetadata: true,
+      },
       outputName: 'resonance-site',
       locales: {
         en: {
