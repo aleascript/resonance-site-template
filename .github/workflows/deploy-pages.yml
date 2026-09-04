@@ -46,15 +46,21 @@ jobs:
           path: dist/publications
           if-no-files-found: error
 
-      - name: Check out PR head for release validation
-        if: github.event_name == 'pull_request'
+  release-check:
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out PR head
         uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
       - name: Validate Semantic Release configuration
-        if: github.event_name == 'pull_request'
         uses: cycjimmy/semantic-release-action@v6
         with:
           semantic_version: 25.0.9
