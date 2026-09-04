@@ -18,6 +18,11 @@ les blessures, les amitiés, les outils, les peurs et les lieux peuvent tous
 changer le sens d'une action. Demandez-vous ce qui est vrai, ici et maintenant.
 Appuyez-vous sur ce que les autres joueurs ont déjà mis en lumière.
 
+:::note[À la table]
+Ce que les joueurs remarquent n'est pas décoratif : dès qu'un détail compte
+pour la table, il peut devenir matière de jeu.
+:::
+
 ## Lorsque l'instant devient incertain
 
 Dites ce que votre personnage cherche à changer et pourquoi cela compte. Rendez

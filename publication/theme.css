@@ -1,0 +1,294 @@
+@page {
+  size: A5;
+  margin: 18mm 16mm 20mm;
+
+  @bottom-center {
+    content: counter(page);
+    font-size: 8pt;
+  }
+}
+
+@page:first {
+  @bottom-center {
+    content: none;
+  }
+}
+
+:root {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 10.5pt;
+  line-height: 1.5;
+  color: #202a38;
+}
+
+body {
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  line-height: 1.15;
+  break-after: avoid;
+}
+
+h1 {
+  font-size: 24pt;
+}
+
+h2 {
+  margin-top: 1.8em;
+  font-size: 16pt;
+}
+
+h3 {
+  font-size: 13pt;
+}
+
+section.level1 {
+  break-before: page;
+}
+
+body > section.level1:first-of-type {
+  break-before: auto;
+}
+
+p,
+li {
+  orphans: 3;
+  widows: 3;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 0.06em;
+  text-underline-offset: 0.12em;
+}
+
+blockquote {
+  margin: 1.25em 0;
+  padding: 0.75em 1em;
+  border-inline-start: 0.3em solid #667085;
+  background: #f4f6f9;
+  break-inside: avoid;
+}
+
+blockquote > :first-child {
+  margin-top: 0;
+}
+
+blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.publication-admonition-title {
+  display: inline-block;
+  margin-bottom: 0.25em;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+}
+
+/*
+ * Admonition colours are deliberately subtle enough for print while preserving
+ * the semantic distinction used by the website. The generated marker lives
+ * inside the blockquote, so :has() lets the publication theme style the whole
+ * admonition without changing the authored Markdown or generated structure.
+ */
+blockquote:has(.publication-admonition-note) {
+  border-inline-start-color: #667085;
+  background: #f4f6f9;
+}
+
+blockquote:has(.publication-admonition-note) .publication-admonition-title {
+  color: #475467;
+}
+
+blockquote:has(.publication-admonition-info) {
+  border-inline-start-color: #315da8;
+  background: #eef4ff;
+}
+
+blockquote:has(.publication-admonition-info) .publication-admonition-title {
+  color: #315da8;
+}
+
+blockquote:has(.publication-admonition-tip) {
+  border-inline-start-color: #2f855a;
+  background: #edf8f0;
+}
+
+blockquote:has(.publication-admonition-tip) .publication-admonition-title {
+  color: #276749;
+}
+
+blockquote:has(.publication-admonition-warning) {
+  border-inline-start-color: #c47a10;
+  background: #fff3d6;
+}
+
+blockquote:has(.publication-admonition-warning) .publication-admonition-title {
+  color: #9a5b08;
+}
+
+blockquote:has(.publication-admonition-danger) {
+  border-inline-start-color: #c53030;
+  background: #fde8e8;
+}
+
+blockquote:has(.publication-admonition-danger) .publication-admonition-title {
+  color: #a61b1b;
+}
+
+blockquote:has(.publication-admonition-design) {
+  border-inline-start-color: #6b46c1;
+  background: #f3effc;
+}
+
+blockquote:has(.publication-admonition-design) .publication-admonition-title {
+  color: #553c9a;
+}
+
+/*
+ * Admonition icons are deliberately drawn with CSS instead of Unicode emoji or
+ * symbol glyphs. PDF generation must not depend on whatever fallback fonts are
+ * installed on the machine or CI runner.
+ */
+.publication-admonition-title::before {
+  display: inline-grid;
+  box-sizing: border-box;
+  width: 1em;
+  height: 1em;
+  margin-right: 0.4em;
+  place-items: center;
+  vertical-align: -0.08em;
+  font-family: Arial, sans-serif;
+  font-size: 0.85em;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Note: a small document with two text lines. */
+.publication-admonition-note::before {
+  border: 0.11em solid currentColor;
+  border-radius: 0.08em;
+  background:
+    linear-gradient(currentColor, currentColor) center 36% / 55% 0.1em no-repeat,
+    linear-gradient(currentColor, currentColor) center 64% / 55% 0.1em no-repeat;
+  content: '';
+}
+
+/* Info: circled ASCII i. */
+.publication-admonition-info::before {
+  border: 0.11em solid currentColor;
+  border-radius: 50%;
+  content: 'i';
+}
+
+/* Tip: check mark drawn from borders. */
+.publication-admonition-tip::before {
+  width: 0.7em;
+  height: 0.42em;
+  margin-right: 0.55em;
+  border-right: 0.14em solid currentColor;
+  border-bottom: 0.14em solid currentColor;
+  content: '';
+  transform: translateY(-0.08em) rotate(45deg);
+}
+
+/* Warning and danger use only an ASCII exclamation mark inside CSS geometry. */
+.publication-admonition-warning::before {
+  border: 0.11em solid currentColor;
+  border-radius: 0.15em;
+  content: '!';
+}
+
+.publication-admonition-danger::before {
+  border: 0.11em solid currentColor;
+  border-radius: 50%;
+  content: '!';
+}
+
+/* Design: a diamond drawn from a rotated border. */
+.publication-admonition-design::before {
+  width: 0.68em;
+  height: 0.68em;
+  margin-right: 0.55em;
+  border: 0.11em solid currentColor;
+  content: '';
+  transform: rotate(45deg);
+}
+
+.publication-cover-page {
+  display: flex;
+  min-height: calc(100vh - 38mm);
+  flex-direction: column;
+  align-items: stretch;
+  text-align: center;
+}
+
+.publication-cover-title {
+  margin: 0 0 0.75em;
+  font-size: 28pt;
+  letter-spacing: 0.02em;
+}
+
+.publication-cover-page [role='doc-cover'] {
+  display: block;
+  width: 100%;
+  max-height: 105mm;
+  margin: 0 auto 1.25em;
+  object-fit: contain;
+}
+
+.publication-cover-metadata {
+  margin-top: auto;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 8.5pt;
+  line-height: 1.45;
+}
+
+.publication-cover-author {
+  margin-bottom: 0.35em;
+  font-size: 10pt;
+  font-weight: 650;
+}
+
+.publication-cover-edition,
+.publication-cover-license,
+.publication-cover-lineage {
+  margin-top: 0.25em;
+}
+
+nav[role='doc-toc'] ol {
+  padding-inline-start: 1.5em;
+}
+
+nav[role='doc-toc'] a {
+  text-decoration: none;
+}
+
+@media print {
+  nav[role='doc-toc'] a {
+    display: inline-flex;
+    width: 100%;
+    align-items: baseline;
+  }
+
+  nav[role='doc-toc'] a::before {
+    order: 1;
+    flex: auto;
+    margin-inline: 0.5em;
+    border-bottom: 1px dotted currentColor;
+    content: '';
+  }
+
+  nav[role='doc-toc'] a::after {
+    order: 2;
+    flex: none;
+    align-self: flex-end;
+    content: target-counter(attr(href), page);
+    text-align: right;
+  }
+}
