@@ -91,6 +91,66 @@ blockquote > :last-child {
 }
 
 /*
+ * Admonition colours are deliberately subtle enough for print while preserving
+ * the semantic distinction used by the website. The generated marker lives
+ * inside the blockquote, so :has() lets the publication theme style the whole
+ * admonition without changing the authored Markdown or generated structure.
+ */
+blockquote:has(.publication-admonition-note) {
+  border-inline-start-color: #667085;
+  background: #f4f6f9;
+}
+
+blockquote:has(.publication-admonition-note) .publication-admonition-title {
+  color: #475467;
+}
+
+blockquote:has(.publication-admonition-info) {
+  border-inline-start-color: #315da8;
+  background: #eef4ff;
+}
+
+blockquote:has(.publication-admonition-info) .publication-admonition-title {
+  color: #315da8;
+}
+
+blockquote:has(.publication-admonition-tip) {
+  border-inline-start-color: #2f855a;
+  background: #edf8f0;
+}
+
+blockquote:has(.publication-admonition-tip) .publication-admonition-title {
+  color: #276749;
+}
+
+blockquote:has(.publication-admonition-warning) {
+  border-inline-start-color: #c47a10;
+  background: #fff3d6;
+}
+
+blockquote:has(.publication-admonition-warning) .publication-admonition-title {
+  color: #9a5b08;
+}
+
+blockquote:has(.publication-admonition-danger) {
+  border-inline-start-color: #c53030;
+  background: #fde8e8;
+}
+
+blockquote:has(.publication-admonition-danger) .publication-admonition-title {
+  color: #a61b1b;
+}
+
+blockquote:has(.publication-admonition-design) {
+  border-inline-start-color: #6b46c1;
+  background: #f3effc;
+}
+
+blockquote:has(.publication-admonition-design) .publication-admonition-title {
+  color: #553c9a;
+}
+
+/*
  * Admonition icons are deliberately drawn with CSS instead of Unicode emoji or
  * symbol glyphs. PDF generation must not depend on whatever fallback fonts are
  * installed on the machine or CI runner.
