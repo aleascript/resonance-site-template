@@ -258,29 +258,28 @@ signal. A non-conventional squash title can correctly result in no release.
 
 ### First release
 
-A repository created from the template normally has no release tags. Before
-Semantic Release runs for the first time, CI creates and pushes a technical
-`v0.0.0` seed tag on the parent of the incoming `main` commit. The seed is
-visible in Git but has no GitHub Release; its only purpose is to establish the
-pre-1.0 SemVer baseline. This lets the first `feat:` naturally create `v0.1.0`
-instead of jumping directly to `1.0.0`. Once any real `vX.Y.Z` release tag
-exists, the bootstrap step becomes a no-op.
+A repository created from the template normally has no release tags. On the
+first successful release run, CI uses `release.initialVersion` from
+`publications.config.mjs` (`0.1.0` in the template), rebuilds the complete corpus
+with that version, and creates the first GitHub Release directly on the current
+`main` HEAD. From that real `vX.Y.Z` tag onward, Semantic Release calculates all
+subsequent versions from Conventional Commits. No synthetic seed tag or PAT with
+workflow scope is required.
 
 ## GitHub Releases and distribution
 
 The workflow in `.github/workflows/deploy-pages.yml` has three responsibilities:
 
-1. every PR validates TypeScript, the localized site, and all publications;
-2. a successful push to `main` runs Semantic Release and, when required,
-   creates the next `vX.Y.Z` tag and GitHub Release;
-3. the resulting site is deployed to GitHub Pages with the current publication
-   corpus under `build/downloads/`.
+1. every PR validates TypeScript, the localized site, all publications, and the Semantic Release configuration;
+2. the first successful release run creates `release.initialVersion`, while later pushes to `main` use Semantic Release to create a new `vX.Y.Z` tag and GitHub Release when required;
+3. the resulting site is deployed to GitHub Pages with the current publication corpus under `build/downloads/`.
 
-During Semantic Release's `prepare` phase, the template rebuilds every
-publication with `PUBLICATION_VERSION` set to the exact next SemVer, builds the
-site, and copies the corpus into the site. The GitHub Release attaches all PDF
-and EPUB files plus `publications.json`. WebPub is directory-based rather than a
-single release asset, so it is served from the website through `/publications/`.
+The first release is prepared explicitly with `release.initialVersion`. For
+subsequent releases, Semantic Release's `prepare` phase rebuilds every publication
+with `PUBLICATION_VERSION` set to the exact next SemVer, builds the site, and
+copies the corpus into the site. GitHub Releases attach all PDF and EPUB files
+plus `publications.json`. WebPub is directory-based rather than a single release
+asset, so it is served from the website through `/publications/`.
 
 A `docs:` or `chore:` push that does not require a new version still rebuilds and
 deploys the site using the latest release tag. GitHub Pages therefore remains
@@ -424,20 +423,23 @@ fix: clarify the Focus procedure
 chore: update CI action
 ```
 
-Avant la toute première release, la CI crée et pousse un tag technique `v0.0.0`
-sur le parent du commit entrant. Ce seed est visible dans Git mais n'a pas de
-GitHub Release ; il sert uniquement à établir l'historique SemVer pré-1.0. Le
-premier `feat:` produit ainsi naturellement `v0.1.0`. Dès qu'un vrai tag de
-release `vX.Y.Z` existe, cette étape ne fait plus rien.
+Lors de la toute première release, la CI utilise `release.initialVersion` depuis
+`publications.config.mjs` (`0.1.0` dans le template), reconstruit le corpus avec
+ce numéro et crée directement la première GitHub Release sur le HEAD courant de
+`main`. À partir de ce vrai tag `vX.Y.Z`, Semantic Release calcule toutes les
+versions suivantes à partir des Conventional Commits. Aucun tag seed artificiel
+ni PAT avec le scope workflow n'est nécessaire.
 
 ### GitHub Releases et site
 
 Sur une PR, la CI construit le site et toutes les publications sans rien
-publier. Après un merge sur `main`, Semantic Release détermine si une nouvelle
-version est nécessaire. Lorsqu'elle l'est, sa phase `prepare` reconstruit tout le
-corpus avec le numéro exact, construit le site, puis GitHub crée le tag et la
-Release. Les PDF, EPUB et `publications.json` sont joints à la GitHub Release.
-Les WebPub, qui sont des répertoires, sont servis directement par le site.
+publier. La première release utilise explicitement `release.initialVersion`.
+Après ce premier vrai tag, Semantic Release détermine à chaque push sur `main` si
+une nouvelle version est nécessaire. Lorsqu'elle l'est, sa phase `prepare`
+reconstruit tout le corpus avec le numéro exact, construit le site, puis GitHub
+crée le tag et la Release. Les PDF, EPUB et `publications.json` sont joints à la
+GitHub Release. Les WebPub, qui sont des répertoires, sont servis directement par
+le site.
 
 Le site est ensuite déployé avec les mêmes fichiers sous `build/downloads/` et
 la page `/publications/` les expose aux lecteurs. Un commit `docs:` ou `chore:`
