@@ -60,6 +60,12 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
+      - name: Simulate pre-1.0 release baseline
+        run: |
+          if ! git tag --list 'v[0-9]*' | grep -q .; then
+            git tag v0.0.0 origin/main
+          fi
+
       - name: Validate Semantic Release configuration
         uses: cycjimmy/semantic-release-action@v6
         with:
