@@ -1,4 +1,4 @@
-name: Build and deploy site
+name: Build, release and deploy site
 
 on:
   push:
@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v7
@@ -37,32 +39,73 @@ jobs:
       - name: Build publications
         run: npm run publication:build
 
-      - name: Upload publication artifacts
+      - name: Upload validation publication artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-publications
+          path: dist/publications
+          if-no-files-found: error
+
+  release:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Ensure pre-1.0 release baseline
+        run: npm run release:baseline
+
+      - name: Semantic Release
+        id: semantic
+        uses: cycjimmy/semantic-release-action@v6
+        with:
+          semantic_version: 25.0.9
+          extra_plugins: |
+            @semantic-release/exec@7.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build current corpus when no release is required
+        if: steps.semantic.outputs.new_release_published != 'true'
+        run: |
+          npm run publication:build
+          npm run build
+          npm run publication:site
+
+      - name: Upload deployed publication artifacts
         uses: actions/upload-artifact@v4
         with:
           name: publications
           path: dist/publications
           if-no-files-found: error
 
-      - name: Add publications to the site
-        if: github.event_name != 'pull_request'
-        run: |
-          mkdir -p build/downloads
-          cp -R dist/publications/. build/downloads/
-
       - name: Configure GitHub Pages
-        if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v5
 
       - name: Upload GitHub Pages artifact
-        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v4
         with:
           path: build
 
   deploy:
-    if: github.event_name != 'pull_request'
-    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: release
     permissions:
       pages: write
       id-token: write
