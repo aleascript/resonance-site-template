@@ -1,3 +1,4 @@
+import {execFileSync} from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -37,7 +38,7 @@ const publicationLabels = {
   },
   fr: {
     version: 'Version',
-    revision: 'Revision',
+    revision: 'Révision',
     designedWith: 'conçu avec',
     poweredBy: 'propulsé par',
   },
@@ -60,6 +61,29 @@ function linkHtml(link) {
   return link.href
     ? `<a href="${escapeHtml(link.href)}">${label}</a>`
     : label;
+}
+
+function resolvePublicationVersion() {
+  const explicit = process.env.PUBLICATION_VERSION?.trim();
+  if (explicit) {
+    return explicit;
+  }
+
+  try {
+    const tag = execFileSync(
+      'git',
+      ['describe', '--tags', '--abbrev=0', '--match', 'v[0-9]*'],
+      {cwd: projectRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore']},
+    ).trim();
+
+    if (/^v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(tag)) {
+      return tag.slice(1);
+    }
+  } catch {
+    // A repository created from the template has no release tag yet.
+  }
+
+  return config.release?.initialVersion ?? '0.1.0';
 }
 
 function parseOpening(line) {
@@ -142,19 +166,59 @@ function transformAdmonitions(markdown, locale, customTypes) {
   return `${output.join('\n')}\n`;
 }
 
+function assetName(baseName, locale, format) {
+  return `${baseName}-${locale}.${format}`;
+}
+
+function publicAssetPath(baseName, locale, format) {
+  const name = assetName(baseName, locale, format);
+  return format === 'webpub' ? `${name}/` : name;
+}
+
 function outputTargets(baseName, locale, formats) {
-  return formats.map((format) => {
-    if (format === 'webpub') {
+  return formats.map((format) => ({
+    path: path.join(outputRoot, assetName(baseName, locale, format)),
+    format,
+  }));
+}
+
+function publicationManifest(version) {
+  const paths = new Set();
+  const publications = Object.entries(config.publications).map(
+    ([publicationName, publication]) => {
+      const baseName = publication.outputName ?? publicationName;
+      const locales = {};
+
+      for (const [locale, localeConfig] of Object.entries(publication.locales)) {
+        const formats = localeConfig.outputs.map((format) => {
+          const assetPath = publicAssetPath(baseName, locale, format);
+          const collisionKey = assetPath.replace(/\/$/, '');
+          if (paths.has(collisionKey)) {
+            throw new Error(`Publication output collision: ${collisionKey}`);
+          }
+          paths.add(collisionKey);
+          return {format, path: assetPath};
+        });
+
+        locales[locale] = {
+          title: localeConfig.title,
+          formats,
+        };
+      }
+
       return {
-        path: path.join(outputRoot, `${baseName}-${locale}.webpub`),
-        format,
+        id: publicationName,
+        outputName: baseName,
+        revision: publication.revision ?? null,
+        locales,
       };
-    }
-    return {
-      path: path.join(outputRoot, `${baseName}-${locale}.${format}`),
-      format,
-    };
-  });
+    },
+  );
+
+  return {
+    version,
+    publications,
+  };
 }
 
 function normalizeCover(cover) {
@@ -202,6 +266,7 @@ async function writeCover(
   locale,
   localeConfig,
   themeDestination,
+  version,
 ) {
   const cover = normalizeCover(publication.cover);
   if (!cover?.image) {
@@ -218,8 +283,8 @@ async function writeCover(
     }
 
     const edition = [];
-    if (publication.version) {
-      edition.push(`${escapeHtml(labels.version)} ${escapeHtml(publication.version)}`);
+    if (version) {
+      edition.push(`${escapeHtml(labels.version)} ${escapeHtml(version)}`);
     }
     if (publication.revision) {
       edition.push(`${escapeHtml(labels.revision)} ${escapeHtml(publication.revision)}`);
@@ -279,7 +344,13 @@ async function writeCover(
   };
 }
 
-async function preparePublication(publicationName, publication, locale, localeConfig) {
+async function preparePublication(
+  publicationName,
+  publication,
+  locale,
+  localeConfig,
+  version,
+) {
   const publicationWorkDir = path.join(workRoot, publicationName, locale);
   await fs.rm(publicationWorkDir, {recursive: true, force: true});
   await fs.mkdir(publicationWorkDir, {recursive: true});
@@ -312,6 +383,7 @@ async function preparePublication(publicationName, publication, locale, localeCo
     locale,
     localeConfig,
     themeDestination,
+    version,
   );
   const entries = [
     ...(cover ? [cover.entry] : []),
@@ -349,6 +421,10 @@ async function main() {
   await fs.rm(outputRoot, {recursive: true, force: true});
   await fs.mkdir(outputRoot, {recursive: true});
 
+  const version = resolvePublicationVersion();
+  const manifest = publicationManifest(version);
+  console.log(`Building publication corpus version ${version}...`);
+
   for (const [publicationName, publication] of Object.entries(config.publications)) {
     for (const [locale, localeConfig] of Object.entries(publication.locales)) {
       console.log(`Building ${publicationName} (${locale})...`);
@@ -357,10 +433,17 @@ async function main() {
         publication,
         locale,
         localeConfig,
+        version,
       );
       await build({config: configPath, logLevel: 'info'});
     }
   }
+
+  await fs.writeFile(
+    path.join(outputRoot, 'publications.json'),
+    `${JSON.stringify(manifest, null, 2)}\n`,
+    'utf8',
+  );
 
   console.log(`Publications written to ${path.relative(projectRoot, outputRoot)}/`);
 }
