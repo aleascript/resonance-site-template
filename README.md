@@ -4,7 +4,8 @@ A bilingual, documentation-first [Docusaurus](https://docusaurus.io/) template
 for Resonance, Regard, and related tabletop role-playing games.
 
 The published site contains only reader-facing game material. Configuration,
-authoring, and deployment instructions belong in this README.
+authoring, publication, release, and deployment instructions belong in this
+README.
 
 ## Included
 
@@ -15,7 +16,10 @@ authoring, and deployment instructions belong in this README.
 - a neutral, accessible light and dark theme;
 - project-level visual tokens for identity, colors, typography, geometry, and editorial width;
 - optional project-lineage credits in the footer;
-- a dedicated `design` admonition for visually distinct design notes;
+- standard Docusaurus admonitions plus a dedicated `design` admonition;
+- PDF, EPUB 3, and WebPub publications built from the same Markdown sources;
+- a reader-facing `/publications/` page generated from the publication manifest;
+- lockstep publication versioning and automated GitHub Releases with Semantic Release;
 - automatic validation and deployment to GitHub Pages.
 
 ## Create a site from the template
@@ -24,8 +28,9 @@ authoring, and deployment instructions belong in this README.
 2. Clone the new repository.
 3. Install Node.js 24 and run `npm install`.
 4. Customize the project metadata and visual tokens in `site.config.ts`.
-5. Replace the sample game material in `docs/en/` and `docs/fr/`.
-6. In **Settings → Pages**, select **GitHub Actions** as the source.
+5. Configure the publication corpus in `publications.config.mjs`.
+6. Replace the sample game material in `docs/en/` and `docs/fr/`.
+7. In **Settings → Pages**, select **GitHub Actions** as the source.
 
 The workflow infers the GitHub owner, repository name, public URL, and Pages
 base path. Set `SITE_URL` and `SITE_BASE_URL` only for a custom domain or an
@@ -96,13 +101,10 @@ selector in `src/css/custom.css` so a Scooby-Doo design note, an Unmind clinical
 design note and a Regard optical design note remain visually native to their
 own sites.
 
-Regular admonitions keep their normal meaning, for example:
-
-```md
-:::note[Remember]
-This is an ordinary note for the reader.
-:::
-```
+The template sample content also contains a showcase for every supported
+admonition (`note`, `tip`, `info`, `warning`, `danger`, and `design`). This acts
+as both documentation and a visual regression check for the site and generated
+publications.
 
 ## Content structure
 
@@ -110,10 +112,12 @@ This is an ordinary note for the reader.
 docs/
 ├── en/
 │   ├── index.md
-│   └── enter-the-fiction.md
+│   ├── enter-the-fiction.md
+│   └── admonitions.md
 └── fr/
     ├── index.md
-    └── enter-the-fiction.md
+    ├── enter-the-fiction.md
+    └── admonitions.md
 ```
 
 Each translated page must keep the same `id`, `slug`, filename, and explicit
@@ -157,11 +161,134 @@ the result locally:
 npm run preview
 ```
 
+Build the downloadable corpus:
+
+```bash
+npm run publication:build
+```
+
+The generated files and `publications.json` manifest are written under
+`dist/publications/`. To copy them into an already-built site exactly as CI
+does, run:
+
+```bash
+npm run publication:site
+```
+
 Validate types and every configured locale:
 
 ```bash
 npm run check
 ```
+
+## Publications and versioning
+
+`publications.config.mjs` composes one or more publications from the canonical
+Markdown sources. Editorial order is independent from the Docusaurus sidebar.
+See [`PUBLICATIONS.md`](PUBLICATIONS.md) for the detailed publication schema.
+
+All publications in a repository use **lockstep versioning**. The version belongs
+to the released project corpus, not to an individual PDF. If a release contains
+Core Rules, a Quickstart and a GM Reference, all three carry the same version
+even when only one document changed. This deliberately avoids independent
+version streams and dependency tracking between overlapping documents.
+
+`revision` remains optional per publication and can describe an editorial state
+such as `Draft`, `r3`, or a date. It is not used to calculate SemVer.
+
+The builder resolves the corpus version in this order:
+
+1. `PUBLICATION_VERSION`, injected by the release workflow;
+2. the latest `vX.Y.Z` Git tag;
+3. `release.initialVersion` from `publications.config.mjs` (the template starts at `0.1.0`).
+
+The same resolved version is printed on every publication cover and written to
+`dist/publications/publications.json`. The `/publications/` page reads that
+manifest and exposes the formats available for the current language.
+
+## Conventional Commits and Semantic Release
+
+Releases are automated by [Semantic Release](https://semantic-release.gitbook.io/)
+and follow a small Conventional Commits contract. The commit message that lands
+on `main` determines whether a new corpus version exists:
+
+| Commit | Effect |
+| --- | --- |
+| `fix: ...` | patch: `0.2.0 → 0.2.1` |
+| `revert: ...` | patch |
+| `feat: ...` | minor: `0.2.1 → 0.3.0` |
+| `feat!: ...` or a `BREAKING CHANGE:` footer | major: `0.x.y → 1.0.0` |
+| `docs:`, `chore:`, `ci:`, `build:`, `test:`, `style:`, `refactor:`, `perf:` | no release |
+
+There is one important editorial rule: **the game's Markdown is product content,
+not repository documentation**. A correction to a rule should therefore be a
+`fix:`. A new rule, chapter, scenario, or player-facing capability should be a
+`feat:`. Reserve `docs:` for README text, contributor instructions, pipeline
+documentation, and similar repository documentation. Otherwise a real change
+to the published game could accidentally ship without a new version.
+
+Breaking changes do not need a special commit type. Conventional Commits uses
+`!` after the type or a `BREAKING CHANGE:` footer, for example:
+
+```text
+feat!: change the stake resolution contract
+```
+
+or:
+
+```text
+feat: revise stake resolution
+
+BREAKING CHANGE: existing game implementations must update their resolution prism
+```
+
+### Squash merges
+
+Semantic Release analyzes the commits present on `main`. When using **Squash and
+merge**, make the PR title itself a valid Conventional Commit, for example:
+
+```text
+feat: add publication downloads
+fix: clarify opposed-stakes wording
+chore: update CI action
+```
+
+That title normally becomes the squash commit subject and therefore the release
+signal. A non-conventional squash title can correctly result in no release.
+
+### First release
+
+A repository created from the template normally has no release tags. Before
+Semantic Release runs for the first time, CI creates a **local-only** `v0.0.0`
+baseline on the parent of the incoming `main` commit. It is not pushed or shown
+as a GitHub Release. This lets the first `feat:` naturally create `v0.1.0`
+instead of jumping directly to `1.0.0`. Once a real `vX.Y.Z` tag exists, the
+bootstrap step becomes a no-op.
+
+## GitHub Releases and distribution
+
+The workflow in `.github/workflows/deploy-pages.yml` has three responsibilities:
+
+1. every PR validates TypeScript, the localized site, and all publications;
+2. a successful push to `main` runs Semantic Release and, when required,
+   creates the next `vX.Y.Z` tag and GitHub Release;
+3. the resulting site is deployed to GitHub Pages with the current publication
+   corpus under `build/downloads/`.
+
+During Semantic Release's `prepare` phase, the template rebuilds every
+publication with `PUBLICATION_VERSION` set to the exact next SemVer, builds the
+site, and copies the corpus into the site. The GitHub Release attaches all PDF
+and EPUB files plus `publications.json`. WebPub is directory-based rather than a
+single release asset, so it is served from the website through `/publications/`.
+
+A `docs:` or `chore:` push that does not require a new version still rebuilds and
+deploys the site using the latest release tag. GitHub Pages therefore remains
+current without inventing an editorial release.
+
+No release commit updates `package.json`, and the repository does not maintain a
+robot-generated `CHANGELOG.md`; Git tags and GitHub Release notes are the release
+history. `package.json` remains private because the repository itself is not an
+npm package.
 
 ## Updating a derived site
 
@@ -172,8 +299,9 @@ updated with `git pull`.
 During the current design-lab phase, generic improvements should therefore be
 promoted to this template and then deliberately ported to each affected game in
 a small pull request. This is preferable to blind synchronization because the
-files most likely to diverge — `site.config.ts`, `src/css/custom.css`, documents
-and assets — are intentionally game-specific.
+files most likely to diverge — `site.config.ts`, `src/css/custom.css`, documents,
+publication configuration, themes, covers, and assets — are intentionally
+game-specific.
 
 A template remote can still be useful for inspecting or applying individual
 commits:
@@ -194,21 +322,19 @@ work.
 ## Theme and navigation
 
 - Project metadata, lineage and visual tokens: `site.config.ts`
+- Publication composition: `publications.config.mjs`
 - Docusaurus, locale, navbar, footer, and admonition parsing: `docusaurus.config.ts`
+- Publications download page: `src/pages/publications.tsx`
 - Custom admonition renderers: `src/theme/Admonition/Types.js`
 - Sidebar structure: `sidebars.ts`
 - Theme tokens and editorial styles: `src/css/custom.css`
 - Runtime theme variables, language detection and preference persistence: `src/theme/Root.tsx`
+- Publication builder and manifest: `tools/build-publications.mjs`
+- Release policy: `.releaserc.json`
 
 The language selector is Docusaurus' native `localeDropdown`. Its
 `?persistLocale=true` query parameter is consumed by `Root.tsx`, which saves the
 reader's explicit choice and then removes the parameter from the visible URL.
-
-## GitHub Pages
-
-The workflow in `.github/workflows/deploy-pages.yml` runs for pull requests and
-pushes to `main`. Pull requests are validated without publishing. A successful
-push to `main` builds every locale and deploys the resulting `build/` directory.
 
 ---
 
@@ -216,8 +342,8 @@ push to `main` builds every locale and deploys the resulting `build/` directory.
 
 Ce dépôt fournit un template [Docusaurus](https://docusaurus.io/) bilingue pour
 Resonance, Regard et les jeux qui en dérivent. Le site publié ne contient que
-des textes destinés aux lecteurs et aux joueurs ; toute la documentation
-technique reste dans ce README.
+des textes destinés aux lecteurs et aux joueurs ; la documentation technique,
+la publication et le mécanisme de release restent décrits dans ce README.
 
 ### Organisation des contenus
 
@@ -241,16 +367,80 @@ composants Docusaurus. Les composants spécifiques restent réservés aux besoin
 qui ne peuvent pas être exprimés proprement par configuration et CSS.
 
 Les **Notes de design** utilisent le type d'admonition dédié
-`:::design[Note de design]`. Le type standard `:::note` reste disponible pour
-les vraies notes destinées au lecteur. Le template fournit une structure
-visuelle minimale pour `design`, que chaque jeu peut ensuite réinterpréter dans
-son propre CSS.
+`:::design[Note de design]`. Les types standard restent disponibles et la page
+d'exemple `admonitions.md` montre les six rendus supportés dans le site et dans
+les publications.
 
 ### Filiation du projet
 
 Le bloc `lineage` de `site.config.ts` contrôle les crédits du pied de page. Un
 jeu utilisant Regard peut déclarer Resonance comme méthode de design et Regard
 comme architecture ; un jeu autonome comme Unmind ne déclare que Resonance.
+
+### Publications et version lockstep
+
+`publications.config.mjs` déclare une ou plusieurs publications, chacune avec
+son ordre éditorial, ses langues, sa couverture, son thème et ses formats. Cet
+ordre est indépendant de la navigation du site.
+
+Toutes les publications du dépôt partagent **la même version de corpus**. Si
+Core Rules, Quickstart et GM Reference sont publiés ensemble en `0.4.1`, les
+trois portent `0.4.1`, même si le commit ne modifie matériellement que l'un
+d'entre eux. On évite ainsi plusieurs trains de versions et la détection complexe
+des documents affectés par des sources partagées.
+
+La propriété `revision` reste locale à une publication et peut indiquer `Draft`,
+`r3` ou une date. Elle n'intervient pas dans SemVer.
+
+Le builder utilise, par ordre de priorité, la variable
+`PUBLICATION_VERSION`, le dernier tag `vX.Y.Z`, puis `release.initialVersion`
+(`0.1.0` dans le template). La version obtenue est imprimée sur toutes les
+couvertures et écrite dans `publications.json`. La page `/publications/` utilise
+ce manifeste pour présenter les téléchargements dans la langue courante.
+
+### Conventional Commits et Semantic Release
+
+La version est calculée automatiquement par Semantic Release à partir du commit
+qui arrive sur `main` :
+
+- `fix:` et `revert:` → incrément **patch** (`0.2.0 → 0.2.1`) ;
+- `feat:` → incrément **minor** (`0.2.1 → 0.3.0`) ;
+- `feat!:` ou un footer `BREAKING CHANGE:` → incrément **major** (`0.x.y → 1.0.0`) ;
+- `docs:`, `chore:`, `ci:`, `build:`, `test:`, `style:`, `refactor:` et `perf:` → pas de nouvelle release.
+
+Attention à une convention importante pour un projet éditorial : **les fichiers
+Markdown du jeu sont le produit, pas de la documentation technique**. Corriger
+une règle est donc un `fix:` ; ajouter une règle, un chapitre, un scénario ou une
+capacité destinée aux joueurs est un `feat:`. `docs:` est réservé au README, aux
+instructions de contribution et à la documentation du pipeline.
+
+Avec **Squash and merge**, le titre de la PR doit être lui-même un Conventional
+Commit, car il devient normalement le sujet du commit analysé sur `main` :
+
+```text
+feat: add facilitator reference publication
+fix: clarify the Focus procedure
+chore: update CI action
+```
+
+Avant la toute première release, la CI crée localement un tag de référence
+`v0.0.0` sur le parent du commit entrant. Ce tag n'est jamais poussé. Il permet
+au premier `feat:` de produire naturellement `v0.1.0`. Dès qu'un vrai tag de
+release existe, cette étape ne fait plus rien.
+
+### GitHub Releases et site
+
+Sur une PR, la CI construit le site et toutes les publications sans rien
+publier. Après un merge sur `main`, Semantic Release détermine si une nouvelle
+version est nécessaire. Lorsqu'elle l'est, sa phase `prepare` reconstruit tout le
+corpus avec le numéro exact, construit le site, puis GitHub crée le tag et la
+Release. Les PDF, EPUB et `publications.json` sont joints à la GitHub Release.
+Les WebPub, qui sont des répertoires, sont servis directement par le site.
+
+Le site est ensuite déployé avec les mêmes fichiers sous `build/downloads/` et
+la page `/publications/` les expose aux lecteurs. Un commit `docs:` ou `chore:`
+qui ne crée pas de release peut tout de même redéployer le site : il reprend
+simplement la dernière version taggée.
 
 ### Mettre à jour un site dérivé
 
@@ -271,9 +461,10 @@ est censé permettre.
 1. Utilisez **Use this template** sur GitHub.
 2. Clonez le nouveau dépôt et exécutez `npm install` avec Node.js 24.
 3. Modifiez les métadonnées et le thème dans `site.config.ts`.
-4. Remplacez les exemples dans `docs/en/` et `docs/fr/`.
-5. Choisissez **GitHub Actions** comme source dans **Settings → Pages**.
-6. Exécutez `npm run check` avant chaque envoi.
+4. Configurez le corpus dans `publications.config.mjs`.
+5. Remplacez les exemples dans `docs/en/` et `docs/fr/`.
+6. Choisissez **GitHub Actions** comme source dans **Settings → Pages**.
+7. Exécutez `npm run check` avant chaque envoi.
 
 Pour travailler avec hot reload :
 
@@ -282,8 +473,8 @@ npm run start:en
 npm run start:fr
 ```
 
-Pour contrôler localement le site bilingue complet :
+Pour construire les publications :
 
 ```bash
-npm run preview
+npm run publication:build
 ```
