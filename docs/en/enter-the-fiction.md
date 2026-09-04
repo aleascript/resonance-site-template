@@ -17,6 +17,11 @@ The world is more than scenery. Weather, memories, customs, wounds, friendships,
 tools, fears, and places may all change what an action means. Ask what is true
 here and now. Build on what the other players have already brought into focus.
 
+:::note[At the table]
+What the players notice is not decoration: once a detail matters to the table,
+it can become material for play.
+:::
+
 ## When the moment becomes uncertain
 
 Say what your character is trying to change and why it matters. Make the stakes
