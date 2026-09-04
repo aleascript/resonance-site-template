@@ -165,7 +165,7 @@ async function preparePublication(publicationName, publication, locale, localeCo
     size: publication.size ?? 'A4',
     entry: entries,
     entryContext: publicationWorkDir,
-    theme: './theme.css',
+    theme: themeDestination,
     toc: {
       title: localeConfig.tocTitle ?? (locale === 'fr' ? 'Sommaire' : 'Contents'),
       sectionDepth: 2,
