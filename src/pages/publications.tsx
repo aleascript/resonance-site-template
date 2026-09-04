@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import Layout from '@theme/Layout';
-import useBaseUrl from '@docusaurus/useBaseUrl';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
 type PublicationFormat = {
@@ -47,11 +46,16 @@ const copy = {
 } as const;
 
 export default function PublicationsPage(): React.ReactNode {
-  const {i18n} = useDocusaurusContext();
+  const {i18n, siteConfig} = useDocusaurusContext();
   const locale = i18n.currentLocale;
   const labels = copy[locale as keyof typeof copy] ?? copy.en;
-  const manifestUrl = useBaseUrl('/downloads/publications.json');
-  const downloadsBase = useBaseUrl('/downloads/');
+  const configuredDeploymentBaseUrl = siteConfig.customFields?.deploymentBaseUrl;
+  const deploymentBaseUrl =
+    typeof configuredDeploymentBaseUrl === 'string'
+      ? configuredDeploymentBaseUrl
+      : siteConfig.baseUrl;
+  const downloadsBase = `${deploymentBaseUrl.replace(/\/?$/, '/')}downloads/`;
+  const manifestUrl = `${downloadsBase}publications.json`;
   const [manifest, setManifest] = useState<PublicationManifest | null>(null);
   const [failed, setFailed] = useState(false);
 
