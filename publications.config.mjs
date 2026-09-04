@@ -15,7 +15,7 @@ export default definePublications({
       outputName: 'resonance-site',
       locales: {
         en: {
-          title: 'Resonance Site',
+          title: 'Resonance',
           tocTitle: 'Contents',
           contents: [
             'docs/en/index.md',
@@ -24,7 +24,7 @@ export default definePublications({
           outputs: ['pdf', 'epub', 'webpub'],
         },
         fr: {
-          title: 'Resonance Site',
+          title: 'Resonance',
           tocTitle: 'Sommaire',
           contents: [
             'docs/fr/index.md',

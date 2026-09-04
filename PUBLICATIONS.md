@@ -23,7 +23,7 @@ export default definePublications({
       outputName: 'resonance-site',
       locales: {
         en: {
-          title: 'Resonance Site',
+          title: 'Resonance',
           tocTitle: 'Contents',
           contents: [
             'docs/en/index.md',
