@@ -18,12 +18,12 @@ export default definePublications({
     core: {
       author: 'AleaScript',
       version: '0.1.0',
-      revision: 'POC',
+      revision: 'DRAFT',
       license: {
         label: 'CC BY 4.0',
         href: 'https://creativecommons.org/licenses/by/4.0/',
         attribution: {
-          title: 'Resonance Site',
+          title: 'Resonance',
           author: 'AleaScript',
           href: null,
         },
@@ -39,7 +39,7 @@ export default definePublications({
         showTitle: true,
         showMetadata: true,
       },
-      outputName: 'resonance-site',
+      outputName: 'resonance',
       locales: {
         en: {
           title: 'Resonance',

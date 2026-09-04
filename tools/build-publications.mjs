@@ -37,7 +37,7 @@ const publicationLabels = {
   },
   fr: {
     version: 'Version',
-    revision: 'Révision',
+    revision: 'Revision',
     designedWith: 'conçu avec',
     poweredBy: 'propulsé par',
   },
