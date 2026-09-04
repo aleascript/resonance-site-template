@@ -39,6 +39,7 @@ export default definePublications({
           contents: [
             'docs/en/index.md',
             'docs/en/enter-the-fiction.md',
+            'docs/en/admonitions.md',
           ],
           outputs: ['pdf', 'epub', 'webpub'],
         },
@@ -48,6 +49,7 @@ export default definePublications({
           contents: [
             'docs/fr/index.md',
             'docs/fr/enter-the-fiction.md',
+            'docs/fr/admonitions.md',
           ],
           outputs: ['pdf', 'epub', 'webpub'],
         },
