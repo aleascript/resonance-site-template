@@ -7,7 +7,7 @@ source for both the Docusaurus site and downloadable publications.
 
 `publications.config.mjs` declares publications independently from the website
 sidebar. Each publication selects its own ordered pages, cover, page size,
-theme, locales, and output formats.
+theme, locales, output formats, credits, and explicit edition metadata.
 
 ```js
 export default definePublications({
@@ -17,9 +17,28 @@ export default definePublications({
   publications: {
     core: {
       author: 'AleaScript',
+      version: '0.1.0',
+      revision: 'POC',
+      license: {
+        label: 'CC BY 4.0',
+        href: 'https://creativecommons.org/licenses/by/4.0/',
+        attribution: {
+          title: 'Resonance Site',
+          author: 'AleaScript',
+          href: null,
+        },
+      },
+      lineage: {
+        designedWith: null,
+        poweredBy: null,
+      },
       size: 'A5',
       theme: 'publication/theme.css',
-      cover: 'static/img/site/resonance_complex_big.png',
+      cover: {
+        image: 'static/img/site/resonance_complex_big.png',
+        showTitle: true,
+        showMetadata: true,
+      },
       outputName: 'resonance-site',
       locales: {
         en: {
@@ -39,6 +58,40 @@ export default definePublications({
 
 A derived project should normally only edit this file and its publication theme
 or cover assets. The builder remains generic.
+
+### Version and revision
+
+`version` and `revision` are deliberately explicit strings owned by the
+publication. They are not inferred from `package.json`, Git tags, or commit
+hashes.
+
+A useful convention is:
+
+- `version`: the public edition of the document, for example `1.0.0`;
+- `revision`: an editorial revision identifier, for example `2026-09-04`, `r3`,
+  or `draft-7`.
+
+They are displayed on the cover when `cover.showMetadata` is enabled.
+
+### Credits, license, and lineage
+
+`author` is passed to Vivliostyle as publication metadata and is also displayed
+on the generated cover.
+
+`license` can contain a simple `label` and `href`, plus an optional
+`attribution`. When attribution is present, the cover renders the attribution
+followed by the linked license reference.
+
+`lineage.designedWith` and `lineage.poweredBy` accept the same `{label, href}`
+shape used by the website. Either can be `null`. A Regard game can therefore
+render credits such as:
+
+`designed with Resonance · powered by Regard`
+
+The publication configuration currently owns these values explicitly. The site
+already exposes equivalent project metadata in `site.config.ts`; consolidating
+that shared identity into one project-level source of truth is a possible
+follow-up once the publication model itself is stable.
 
 ## Build
 
@@ -92,13 +145,28 @@ can be added later if a real project needs them.
 
 ## Cover and theme
 
-`cover` points to an image owned by the project. Vivliostyle generates the cover
-page and reuses the image metadata for EPUB/WebPub.
+`cover.image` points to an image owned by the project. The builder creates a
+custom Vivliostyle cover document around it so the publication title can appear
+before the image and publication metadata can appear below it.
+
+By default the cover title is the locale's `title`. A locale can override it
+with `coverTitle`. `cover.showTitle` and `cover.showMetadata` can independently
+hide the title or metadata block.
+
+The builder keeps the image marked as the publication cover for EPUB and WebPub,
+not merely as a decorative image in the PDF.
 
 `theme` points to publication-specific CSS. `publication/theme.css` is a neutral
 starter theme that demonstrates page size, page numbers, headings, table of
-contents, and admonition styling. Derived games are expected to replace or
-extend it with their own editorial identity.
+contents, cover layout, credits, and admonition styling. Derived games are
+expected to replace or extend it with their own editorial identity.
+
+### Table of contents page numbers
+
+The PDF table of contents appends the actual target page number to every entry
+using paged-media cross references and a dotted leader. This styling is scoped
+to print media. EPUB and WebPub deliberately do not receive fixed page numbers,
+because their layout is reflowable and pagination depends on the reader.
 
 ## CI and distribution
 
