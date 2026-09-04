@@ -225,10 +225,11 @@ README.
 When squash merging, the PR title should itself be a Conventional Commit so the
 squash commit on `main` carries the intended release signal.
 
-Before the first release, `tools/ensure-release-baseline.mjs` creates a local
-`v0.0.0` tag on the parent of the incoming main commit. It is not pushed. This
-allows the first `feat:` to produce `v0.1.0`. Once a real release tag exists, the
-bootstrap step becomes a no-op.
+Before the first release, `tools/ensure-release-baseline.mjs` creates and pushes
+a technical `v0.0.0` seed tag on the parent of the incoming main commit. The
+seed is visible in Git but has no GitHub Release; it exists only to establish
+pre-1.0 SemVer history so the first `feat:` creates `v0.1.0`. Once a real
+`vX.Y.Z` release tag exists, the bootstrap step becomes a no-op.
 
 During Semantic Release's `prepare` step,
 `tools/prepare-release.mjs` receives `nextRelease.version`, exposes it as
