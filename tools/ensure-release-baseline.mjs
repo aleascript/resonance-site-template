@@ -1,7 +1,10 @@
 import {execFileSync} from 'node:child_process';
 
-function git(args) {
-  return execFileSync('git', args, {encoding: 'utf8'}).trim();
+function git(args, options = {}) {
+  return execFileSync('git', args, {
+    encoding: 'utf8',
+    stdio: options.stdio ?? ['ignore', 'pipe', 'pipe'],
+  }).trim();
 }
 
 const releaseTags = git(['tag', '--list', 'v[0-9]*'])
@@ -22,4 +25,8 @@ try {
 }
 
 git(['tag', 'v0.0.0', baselineCommit]);
-console.log(`Created local semantic-release baseline v0.0.0 at ${baselineCommit}.`);
+git(['push', 'origin', 'refs/tags/v0.0.0'], {stdio: 'inherit'});
+console.log(
+  `Created semantic-release seed tag v0.0.0 at ${baselineCommit}. ` +
+    'The seed has no GitHub Release and only establishes pre-1.0 SemVer history.',
+);
