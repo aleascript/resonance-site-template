@@ -7,18 +7,20 @@ source for both the Docusaurus site and downloadable publications.
 
 `publications.config.mjs` declares publications independently from the website
 sidebar. Each publication selects its own ordered pages, cover, page size,
-theme, locales, output formats, credits, and explicit edition metadata.
+theme, locales, output formats, credits, and optional editorial revision.
 
 ```js
 export default definePublications({
+  release: {
+    initialVersion: '0.1.0',
+  },
   markdown: {
     admonitions: ['design'],
   },
   publications: {
     core: {
       author: 'AleaScript',
-      version: '0.1.0',
-      revision: 'DRAFT',
+      revision: 'Draft',
       license: {
         label: 'CC BY 4.0',
         href: 'https://creativecommons.org/licenses/by/4.0/',
@@ -59,21 +61,50 @@ export default definePublications({
 A derived project should normally only edit this file and its publication theme
 or cover assets. The builder remains generic.
 
-### Version and revision
+## Version and revision
 
-`version` and `revision` are deliberately explicit strings owned by the
-publication. They are not inferred from `package.json`, Git tags, or commit
-hashes.
+The repository uses **lockstep publication versioning**. A version identifies a
+released corpus, not an individual file. All publications rebuilt for a release
+therefore carry the same SemVer even if only one document changed.
 
-A useful convention is:
+The builder resolves the version in this order:
 
-- `version`: the public edition of the document, for example `1.0.0`;
-- `revision`: an editorial revision identifier, for example `2026-09-04`, `r3`,
-  or `draft-7`.
+1. `PUBLICATION_VERSION`, supplied by Semantic Release during release preparation;
+2. the latest Git tag matching `vX.Y.Z`;
+3. `release.initialVersion` from `publications.config.mjs`.
 
-They are displayed on the cover when `cover.showMetadata` is enabled.
+The template starts at `0.1.0`. There is no `version` field inside individual
+publication declarations.
 
-### Credits, license, and lineage
+`revision` remains publication-specific. It is an optional editorial identifier
+such as `Draft`, `2026-09-04`, `r3`, or `draft-7`. It does not participate in
+SemVer and can differ between publications in the same released corpus.
+
+The resolved version and revision are displayed on the cover when
+`cover.showMetadata` is enabled.
+
+This intentionally avoids independent version streams such as Core Rules 1.2.0,
+Quickstart 1.4.3, and GM Reference 0.8.1. Independent streams would require
+tracking which overlapping source documents affect which publication and would
+turn the template into a monorepo release manager before a real project has
+shown that complexity is necessary.
+
+## Manifest and publication page
+
+Every successful publication build writes
+`dist/publications/publications.json`. The manifest contains the lockstep corpus
+version and, for each publication and locale, the available formats and relative
+paths.
+
+The Docusaurus `/publications/` page reads that manifest from
+`/downloads/publications.json` and presents the current locale's editions. The
+same page component is reused in every locale.
+
+On deployment, `tools/copy-publications-to-site.mjs` copies the entire
+`dist/publications/` directory into `build/downloads/`, so the manifest and the
+files it references always travel together.
+
+## Credits, license, and lineage
 
 `author` is passed to Vivliostyle as publication metadata and is also displayed
 on the generated cover.
@@ -101,12 +132,18 @@ Install dependencies and run:
 npm run publication:build
 ```
 
-Outputs are written under `dist/publications/`. The current POC creates PDF,
-EPUB 3, and Web Publication editions for both configured locales.
+Outputs are written under `dist/publications/`. The template creates PDF, EPUB 3,
+and Web Publication editions for each configured locale, plus the manifest.
 
 The build uses Vivliostyle CLI. PDF is the required publication format. EPUB
 and WebPub intentionally share the same content and theme in this first
 iteration; projects can later add format-specific CSS if a reader requires it.
+
+To copy a built corpus into an already-built site:
+
+```bash
+npm run publication:site
+```
 
 ## Markdown portability
 
@@ -168,18 +205,54 @@ using paged-media cross references and a dotted leader. This styling is scoped
 to print media. EPUB and WebPub deliberately do not receive fixed page numbers,
 because their layout is reflowable and pagination depends on the reader.
 
+## Semantic Release
+
+`.releaserc.json` defines one release stream for the repository. The commit that
+lands on `main` controls SemVer:
+
+- `fix:` and `revert:` create a patch release;
+- `feat:` creates a minor release;
+- a Conventional Commits breaking marker (`!` or `BREAKING CHANGE:`) creates a
+  major release;
+- `docs:`, `chore:`, `ci:`, `build:`, `test:`, `style:`, `refactor:`, and
+  `perf:` do not create a release.
+
+For editorial repositories, Markdown game content is the product. A change to a
+published rule should therefore use `fix:` or `feat:` rather than `docs:`.
+`docs:` is reserved for repository documentation such as this file or the
+README.
+
+When squash merging, the PR title should itself be a Conventional Commit so the
+squash commit on `main` carries the intended release signal.
+
+Before the first release, `tools/ensure-release-baseline.mjs` creates a local
+`v0.0.0` tag on the parent of the incoming main commit. It is not pushed. This
+allows the first `feat:` to produce `v0.1.0`. Once a real release tag exists, the
+bootstrap step becomes a no-op.
+
+During Semantic Release's `prepare` step,
+`tools/prepare-release.mjs` receives `nextRelease.version`, exposes it as
+`PUBLICATION_VERSION`, rebuilds the complete corpus, builds the site, and copies
+the corpus into `build/downloads/`. `@semantic-release/github` then creates the
+GitHub Release and attaches all PDF and EPUB files plus `publications.json`.
+
+WebPub remains website distribution because the current Vivliostyle output is a
+directory rather than a single GitHub Release asset.
+
 ## CI and distribution
 
-The existing Pages workflow now builds publications for pull requests and
-pushes to `main`.
+The Pages workflow validates pull requests and publishes from `main`.
 
-- Every run uploads `dist/publications/` as a GitHub Actions artifact, so a PR
-  validates the complete publication pipeline.
-- On `main`, the same files are copied into `build/downloads/` before Pages is
-  deployed, making them downloadable from the published site.
-- GitHub Releases are intentionally left for the next distribution step. The
-  build artifacts are already shaped so a tagged release or a rolling snapshot
-  release can attach the same files without rebuilding them differently.
+- Every PR builds the site and complete publication corpus and uploads
+  `dist/publications/` as a validation artifact.
+- A successful push to `main` runs Semantic Release.
+- If the commit requires a release, the corpus is rebuilt with the exact new
+  version before the GitHub Release is published.
+- If the commit does not require a release, the site is still rebuilt using the
+  latest release tag, so technical/documentation-only changes can deploy without
+  inventing an editorial version.
+- The deployed site receives the corpus under `build/downloads/` and exposes it
+  through `/publications/`.
 
 Generated publication files and Vivliostyle working files are ignored by Git.
 They are build products, not authored sources.
