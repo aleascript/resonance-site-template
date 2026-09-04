@@ -147,7 +147,7 @@ async function preparePublication(publicationName, publication, locale, localeCo
 
     await fs.mkdir(path.dirname(destinationAbsolute), {recursive: true});
     await fs.writeFile(destinationAbsolute, transformed, 'utf8');
-    entries.push(destinationAbsolute);
+    entries.push(sourcePath);
   }
 
   const themeSource = path.join(projectRoot, publication.theme);
@@ -158,26 +158,23 @@ async function preparePublication(publicationName, publication, locale, localeCo
   const staticDestination = path.join(publicationWorkDir, 'static');
   await fs.cp(staticSource, staticDestination, {recursive: true});
 
-  const cover = publication.cover
-    ? path.join(publicationWorkDir, publication.cover)
-    : undefined;
-
   const task = {
     title: localeConfig.title,
     author: publication.author,
     language: locale,
     size: publication.size ?? 'A4',
     entry: entries,
-    theme: themeDestination,
+    entryContext: publicationWorkDir,
+    theme: './theme.css',
     toc: {
       title: localeConfig.tocTitle ?? (locale === 'fr' ? 'Sommaire' : 'Contents'),
       sectionDepth: 2,
     },
-    ...(cover ? {cover} : {}),
+    ...(publication.cover ? {cover: publication.cover} : {}),
     output: outputTargets(publication.outputName ?? publicationName, locale, localeConfig.outputs),
-    workspaceDir: path.join(publicationWorkDir, '.vivliostyle'),
+    workspaceDir: '.vivliostyle',
     static: {
-      '/': [staticDestination, publicationWorkDir],
+      '/': staticDestination,
     },
   };
 
