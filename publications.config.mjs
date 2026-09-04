@@ -3,13 +3,15 @@ export function definePublications(config) {
 }
 
 export default definePublications({
+  release: {
+    initialVersion: '0.1.0',
+  },
   markdown: {
     admonitions: ['design'],
   },
   publications: {
     core: {
       author: 'AleaScript',
-      version: '0.1.0',
       revision: 'Draft',
       license: {
         label: 'CC BY 4.0',
