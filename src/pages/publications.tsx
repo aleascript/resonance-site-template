@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import Layout from '@theme/Layout';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import {useDocusaurusContext} from '@docusaurus/core';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
- type PublicationFormat = {
+type PublicationFormat = {
   format: string;
   path: string;
 };
