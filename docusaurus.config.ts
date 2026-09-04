@@ -118,7 +118,6 @@ const config: Config = {
           },
         },
         blog: false,
-        pages: false,
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -147,6 +146,11 @@ const config: Config = {
           sidebarId: 'docsSidebar',
           position: 'left',
           label: 'Contents',
+        },
+        {
+          to: '/publications/',
+          label: 'Publications',
+          position: 'left',
         },
         {
           type: 'localeDropdown',
