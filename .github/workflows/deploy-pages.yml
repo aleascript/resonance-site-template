@@ -34,6 +34,22 @@ jobs:
       - name: Build localized site
         run: npm run build
 
+      - name: Build publications
+        run: npm run publication:build
+
+      - name: Upload publication artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: publications
+          path: dist/publications
+          if-no-files-found: error
+
+      - name: Add publications to the site
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p build/downloads
+          cp -R dist/publications/. build/downloads/
+
       - name: Configure GitHub Pages
         if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v5
