@@ -259,11 +259,12 @@ signal. A non-conventional squash title can correctly result in no release.
 ### First release
 
 A repository created from the template normally has no release tags. Before
-Semantic Release runs for the first time, CI creates a **local-only** `v0.0.0`
-baseline on the parent of the incoming `main` commit. It is not pushed or shown
-as a GitHub Release. This lets the first `feat:` naturally create `v0.1.0`
-instead of jumping directly to `1.0.0`. Once a real `vX.Y.Z` tag exists, the
-bootstrap step becomes a no-op.
+Semantic Release runs for the first time, CI creates and pushes a technical
+`v0.0.0` seed tag on the parent of the incoming `main` commit. The seed is
+visible in Git but has no GitHub Release; its only purpose is to establish the
+pre-1.0 SemVer baseline. This lets the first `feat:` naturally create `v0.1.0`
+instead of jumping directly to `1.0.0`. Once any real `vX.Y.Z` release tag
+exists, the bootstrap step becomes a no-op.
 
 ## GitHub Releases and distribution
 
@@ -423,10 +424,11 @@ fix: clarify the Focus procedure
 chore: update CI action
 ```
 
-Avant la toute première release, la CI crée localement un tag de référence
-`v0.0.0` sur le parent du commit entrant. Ce tag n'est jamais poussé. Il permet
-au premier `feat:` de produire naturellement `v0.1.0`. Dès qu'un vrai tag de
-release existe, cette étape ne fait plus rien.
+Avant la toute première release, la CI crée et pousse un tag technique `v0.0.0`
+sur le parent du commit entrant. Ce seed est visible dans Git mais n'a pas de
+GitHub Release ; il sert uniquement à établir l'historique SemVer pré-1.0. Le
+premier `feat:` produit ainsi naturellement `v0.1.0`. Dès qu'un vrai tag de
+release `vX.Y.Z` existe, cette étape ne fait plus rien.
 
 ### GitHub Releases et site
 
