@@ -196,7 +196,13 @@ function coverTitle(publication, localeConfig, cover) {
   return localeConfig.coverTitle ?? cover.title ?? localeConfig.title;
 }
 
-async function writeCover(publicationWorkDir, publication, locale, localeConfig) {
+async function writeCover(
+  publicationWorkDir,
+  publication,
+  locale,
+  localeConfig,
+  themeDestination,
+) {
   const cover = normalizeCover(publication.cover);
   if (!cover?.image) {
     return null;
@@ -264,6 +270,7 @@ async function writeCover(publicationWorkDir, publication, locale, localeConfig)
       rel: 'cover',
       path: 'publication-cover.html',
       output: 'cover.html',
+      theme: themeDestination,
     },
     cover: {
       src: cover.image,
@@ -299,7 +306,13 @@ async function preparePublication(publicationName, publication, locale, localeCo
   const staticDestination = path.join(publicationWorkDir, 'static');
   await fs.cp(staticSource, staticDestination, {recursive: true});
 
-  const cover = await writeCover(publicationWorkDir, publication, locale, localeConfig);
+  const cover = await writeCover(
+    publicationWorkDir,
+    publication,
+    locale,
+    localeConfig,
+    themeDestination,
+  );
   const entries = [
     ...(cover ? [cover.entry] : []),
     {rel: 'contents'},
