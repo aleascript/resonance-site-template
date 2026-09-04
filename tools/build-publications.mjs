@@ -28,12 +28,38 @@ const defaultTitles = {
   },
 };
 
+const publicationLabels = {
+  en: {
+    version: 'Version',
+    revision: 'Revision',
+    designedWith: 'designed with',
+    poweredBy: 'powered by',
+  },
+  fr: {
+    version: 'Version',
+    revision: 'Révision',
+    designedWith: 'conçu avec',
+    poweredBy: 'propulsé par',
+  },
+};
+
 function escapeHtml(value) {
-  return value
+  return String(value)
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;');
+}
+
+function linkHtml(link) {
+  if (!link) {
+    return null;
+  }
+
+  const label = escapeHtml(link.label);
+  return link.href
+    ? `<a href="${escapeHtml(link.href)}">${label}</a>`
+    : label;
 }
 
 function parseOpening(line) {
@@ -131,13 +157,128 @@ function outputTargets(baseName, locale, formats) {
   });
 }
 
+function normalizeCover(cover) {
+  if (!cover) {
+    return null;
+  }
+  if (typeof cover === 'string') {
+    return {image: cover, showTitle: true, showMetadata: true};
+  }
+  return {
+    showTitle: true,
+    showMetadata: true,
+    ...cover,
+  };
+}
+
+function licenseHtml(license) {
+  if (!license) {
+    return null;
+  }
+
+  const licenseLink = linkHtml(license);
+  const attribution = license.attribution;
+  if (!attribution) {
+    return licenseLink;
+  }
+
+  const title = attribution.href
+    ? `<a href="${escapeHtml(attribution.href)}">${escapeHtml(attribution.title)}</a>`
+    : escapeHtml(attribution.title);
+  const author = escapeHtml(attribution.author);
+  return `${title} · ${author} · ${licenseLink}`;
+}
+
+function coverTitle(publication, localeConfig, cover) {
+  if (!cover || cover.showTitle === false) {
+    return null;
+  }
+  return localeConfig.coverTitle ?? cover.title ?? localeConfig.title;
+}
+
+async function writeCover(publicationWorkDir, publication, locale, localeConfig) {
+  const cover = normalizeCover(publication.cover);
+  if (!cover?.image) {
+    return null;
+  }
+
+  const labels = publicationLabels[locale] ?? publicationLabels.en;
+  const title = coverTitle(publication, localeConfig, cover);
+  const metadata = [];
+
+  if (cover.showMetadata !== false) {
+    if (publication.author) {
+      metadata.push(`<div class="publication-cover-author">${escapeHtml(publication.author)}</div>`);
+    }
+
+    const edition = [];
+    if (publication.version) {
+      edition.push(`${escapeHtml(labels.version)} ${escapeHtml(publication.version)}`);
+    }
+    if (publication.revision) {
+      edition.push(`${escapeHtml(labels.revision)} ${escapeHtml(publication.revision)}`);
+    }
+    if (edition.length > 0) {
+      metadata.push(`<div class="publication-cover-edition">${edition.join(' · ')}</div>`);
+    }
+
+    const license = licenseHtml(publication.license);
+    if (license) {
+      metadata.push(`<div class="publication-cover-license">${license}</div>`);
+    }
+
+    const lineage = [];
+    const designedWith = linkHtml(publication.lineage?.designedWith);
+    const poweredBy = linkHtml(publication.lineage?.poweredBy);
+    if (designedWith) {
+      lineage.push(`${escapeHtml(labels.designedWith)} ${designedWith}`);
+    }
+    if (poweredBy) {
+      lineage.push(`${escapeHtml(labels.poweredBy)} ${poweredBy}`);
+    }
+    if (lineage.length > 0) {
+      metadata.push(`<div class="publication-cover-lineage">${lineage.join(' · ')}</div>`);
+    }
+  }
+
+  const coverPath = path.join(publicationWorkDir, 'publication-cover.html');
+  const html = `<!doctype html>
+<html lang="${escapeHtml(locale)}">
+<head>
+  <meta charset="utf-8">
+  <title>${escapeHtml(title ?? localeConfig.title)}</title>
+</head>
+<body class="publication-cover-document">
+  <main class="publication-cover-page">
+    ${title ? `<h1 class="publication-cover-title">${escapeHtml(title)}</h1>` : ''}
+    <img role="doc-cover" />
+    ${metadata.length > 0 ? `<footer class="publication-cover-metadata">${metadata.join('\n')}</footer>` : ''}
+  </main>
+</body>
+</html>
+`;
+
+  await fs.writeFile(coverPath, html, 'utf8');
+  return {
+    entry: {
+      rel: 'cover',
+      path: 'publication-cover.html',
+      output: 'cover.html',
+    },
+    cover: {
+      src: cover.image,
+      name: title ?? localeConfig.title,
+    },
+  };
+}
+
 async function preparePublication(publicationName, publication, locale, localeConfig) {
   const publicationWorkDir = path.join(workRoot, publicationName, locale);
   await fs.rm(publicationWorkDir, {recursive: true, force: true});
   await fs.mkdir(publicationWorkDir, {recursive: true});
 
   const customAdmonitions = config.markdown?.admonitions ?? [];
-  const entries = [];
+  const contentEntries = [];
 
   for (const sourcePath of localeConfig.contents) {
     const sourceAbsolute = path.join(projectRoot, sourcePath);
@@ -147,7 +288,7 @@ async function preparePublication(publicationName, publication, locale, localeCo
 
     await fs.mkdir(path.dirname(destinationAbsolute), {recursive: true});
     await fs.writeFile(destinationAbsolute, transformed, 'utf8');
-    entries.push(sourcePath);
+    contentEntries.push(sourcePath);
   }
 
   const themeSource = path.join(projectRoot, publication.theme);
@@ -157,6 +298,13 @@ async function preparePublication(publicationName, publication, locale, localeCo
   const staticSource = path.join(projectRoot, 'static');
   const staticDestination = path.join(publicationWorkDir, 'static');
   await fs.cp(staticSource, staticDestination, {recursive: true});
+
+  const cover = await writeCover(publicationWorkDir, publication, locale, localeConfig);
+  const entries = [
+    ...(cover ? [cover.entry] : []),
+    {rel: 'contents'},
+    ...contentEntries,
+  ];
 
   const task = {
     title: localeConfig.title,
@@ -170,7 +318,7 @@ async function preparePublication(publicationName, publication, locale, localeCo
       title: localeConfig.tocTitle ?? (locale === 'fr' ? 'Sommaire' : 'Contents'),
       sectionDepth: 2,
     },
-    ...(publication.cover ? {cover: publication.cover} : {}),
+    ...(cover ? {cover: cover.cover} : {}),
     output: outputTargets(publication.outputName ?? publicationName, locale, localeConfig.outputs),
     workspaceDir: '.vivliostyle',
     static: {
