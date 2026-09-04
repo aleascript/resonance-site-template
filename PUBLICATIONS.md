@@ -69,7 +69,7 @@ therefore carry the same SemVer even if only one document changed.
 
 The builder resolves the version in this order:
 
-1. `PUBLICATION_VERSION`, supplied by Semantic Release during release preparation;
+1. `PUBLICATION_VERSION`, supplied during release preparation;
 2. the latest Git tag matching `vX.Y.Z`;
 3. `release.initialVersion` from `publications.config.mjs`.
 
@@ -208,7 +208,7 @@ because their layout is reflowable and pagination depends on the reader.
 ## Semantic Release
 
 `.releaserc.json` defines one release stream for the repository. The commit that
-lands on `main` controls SemVer:
+lands on `main` controls SemVer after the first release exists:
 
 - `fix:` and `revert:` create a patch release;
 - `feat:` creates a minor release;
@@ -225,11 +225,12 @@ README.
 When squash merging, the PR title should itself be a Conventional Commit so the
 squash commit on `main` carries the intended release signal.
 
-Before the first release, `tools/ensure-release-baseline.mjs` creates and pushes
-a technical `v0.0.0` seed tag on the parent of the incoming main commit. The
-seed is visible in Git but has no GitHub Release; it exists only to establish
-pre-1.0 SemVer history so the first `feat:` creates `v0.1.0`. Once a real
-`vX.Y.Z` release tag exists, the bootstrap step becomes a no-op.
+A repository created from the template normally has no release tags. The first
+successful release run therefore uses `release.initialVersion` (default
+`0.1.0`), rebuilds the complete corpus with that exact version, and creates the
+first GitHub Release directly on the current `main` HEAD. From that real
+`vX.Y.Z` tag onward, Semantic Release manages subsequent versions. No synthetic
+seed tag or PAT with workflow scope is required.
 
 During Semantic Release's `prepare` step,
 `tools/prepare-release.mjs` receives `nextRelease.version`, exposes it as
@@ -244,14 +245,16 @@ directory rather than a single GitHub Release asset.
 
 The Pages workflow validates pull requests and publishes from `main`.
 
-- Every PR builds the site and complete publication corpus and uploads
-  `dist/publications/` as a validation artifact.
-- A successful push to `main` runs Semantic Release.
-- If the commit requires a release, the corpus is rebuilt with the exact new
-  version before the GitHub Release is published.
-- If the commit does not require a release, the site is still rebuilt using the
-  latest release tag, so technical/documentation-only changes can deploy without
-  inventing an editorial version.
+- Every PR builds the site and complete publication corpus, validates the release
+  configuration, and uploads `dist/publications/` as a validation artifact.
+- If no real release tag exists yet, a successful push to `main` creates
+  `release.initialVersion` as the first GitHub Release.
+- Once a real release exists, successful pushes to `main` run Semantic Release.
+- If a subsequent commit requires a release, the corpus is rebuilt with the
+  exact new version before the GitHub Release is published.
+- If a subsequent commit does not require a release, the site is still rebuilt
+  using the latest release tag, so technical/documentation-only changes can
+  deploy without inventing an editorial version.
 - The deployed site receives the corpus under `build/downloads/` and exposes it
   through `/publications/`.
 
