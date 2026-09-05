@@ -43,7 +43,7 @@ export default definePublications({
             'docs/en/enter-the-fiction.md',
             'docs/en/admonitions.md',
           ],
-          outputs: ['pdf', 'epub', 'webpub'],
+          outputs: ['pdf'],
         },
         fr: {
           title: 'Resonance',
@@ -53,7 +53,7 @@ export default definePublications({
             'docs/fr/enter-the-fiction.md',
             'docs/fr/admonitions.md',
           ],
-          outputs: ['pdf', 'epub', 'webpub'],
+          outputs: ['pdf'],
         },
       },
     },

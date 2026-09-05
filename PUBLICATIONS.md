@@ -50,7 +50,7 @@ export default definePublications({
             'docs/en/index.md',
             'docs/en/enter-the-fiction.md',
           ],
-          outputs: ['pdf', 'epub', 'webpub'],
+          outputs: ['pdf'],
         },
       },
     },
@@ -132,12 +132,9 @@ Install dependencies and run:
 npm run publication:build
 ```
 
-Outputs are written under `dist/publications/`. The template creates PDF, EPUB 3,
-and Web Publication editions for each configured locale, plus the manifest.
+Outputs are written under `dist/publications/`. The template creates PDF editions for each configured locale, plus the manifest.
 
-The build uses Vivliostyle CLI. PDF is the required publication format. EPUB
-and WebPub intentionally share the same content and theme in this first
-iteration; projects can later add format-specific CSS if a reader requires it.
+The build uses Vivliostyle CLI. PDF is the required publication format.
 
 To copy a built corpus into an already-built site:
 
@@ -190,9 +187,6 @@ By default the cover title is the locale's `title`. A locale can override it
 with `coverTitle`. `cover.showTitle` and `cover.showMetadata` can independently
 hide the title or metadata block.
 
-The builder keeps the image marked as the publication cover for EPUB and WebPub,
-not merely as a decorative image in the PDF.
-
 `theme` points to publication-specific CSS. `publication/theme.css` is a neutral
 starter theme that demonstrates page size, page numbers, headings, table of
 contents, cover layout, credits, and admonition styling. Derived games are
@@ -202,8 +196,7 @@ expected to replace or extend it with their own editorial identity.
 
 The PDF table of contents appends the actual target page number to every entry
 using paged-media cross references and a dotted leader. This styling is scoped
-to print media. EPUB and WebPub deliberately do not receive fixed page numbers,
-because their layout is reflowable and pagination depends on the reader.
+to print media. 
 
 ## Semantic Release
 
@@ -236,7 +229,7 @@ During Semantic Release's `prepare` step,
 `tools/prepare-release.mjs` receives `nextRelease.version`, exposes it as
 `PUBLICATION_VERSION`, rebuilds the complete corpus, builds the site, and copies
 the corpus into `build/downloads/`. `@semantic-release/github` then creates the
-GitHub Release and attaches all PDF and EPUB files plus `publications.json`.
+GitHub Release and attaches all PDF files plus `publications.json`.
 
 WebPub remains website distribution because the current Vivliostyle output is a
 directory rather than a single GitHub Release asset.
